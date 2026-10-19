@@ -36,7 +36,6 @@
 
 	let inputEl = $state<HTMLInputElement | undefined>();
 	let pressed = $state<string[]>([]);
-	let mousePressed = $state(false);
 	let resultsOpen = $state(false);
 	let lastResult = $state<GameResult | null>(null);
 	let isRecord = $state(false);
@@ -107,19 +106,11 @@
 		pressed = pressed.filter((item) => item !== code);
 	}
 
-	function flashMouse(): void {
-		mousePressed = true;
-		setTimeout(() => {
-			mousePressed = false;
-		}, 140);
-	}
-
 	function handleVirtualKey(key: KeyboardKey): void {
 		unlockAudio();
 		playKeyClick();
 		press(key.code);
 		setTimeout(() => release(key.code), 130);
-		flashMouse();
 
 		if (key.kind === 'backspace') {
 			game.backspace();
@@ -135,7 +126,6 @@
 	function handleVirtualChar(char: string): void {
 		unlockAudio();
 		playKeyClick();
-		flashMouse();
 		game.append(char);
 		inputEl?.focus();
 	}
@@ -301,7 +291,7 @@
 		</div>
 
 		<div class="w-full max-w-3xl">
-			<DeskScene {mousePressed}>
+			<DeskScene>
 				<VirtualKeyboard
 					{pressed}
 					disabled={game.state.status !== 'running'}
