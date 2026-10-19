@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="text-scale" content="scale" />
+		<meta name="theme-color" content="#030a16" />
+		<script>
+			(() => {
+				const stored = localStorage.getItem('typing-game:theme');
+				const mode =
+					stored === 'light' || stored === 'dark'
+						? stored
+						: matchMedia('(prefers-color-scheme: dark)').matches
+							? 'dark'
+							: 'light';
+				document.documentElement.dataset.theme = mode;
+				document.documentElement.style.colorScheme = mode;
+			})();
+		</script>
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@graph": [
+					{
+						"@type": "WebApplication",
+						"name": "Typing Game",
+						"description": "Jogo de digitação em português com níveis iniciante, amador e expert, modo personalizado e ranking.",
+						"applicationCategory": "GameApplication",
+						"operatingSystem": "Any",
+						"inLanguage": "pt-BR",
+						"offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" }
+					},
+					{
+						"@type": "FAQPage",
+						"mainEntity": [
+							{
+								"@type": "Question",
+								"name": "Preciso instalar alguma coisa para jogar?",
+								"acceptedAnswer": {
+									"@type": "Answer",
+									"text": "Não. O Typing Game roda direto no navegador, de graça, e funciona em computador, tablet e celular."
+								}
+							},
+							{
+								"@type": "Question",
+								"name": "Como funciona o modo personalizado?",
+								"acceptedAnswer": {
+									"@type": "Answer",
+									"text": "Você escolhe de 1 a 100 palavras e de 5 a 120 segundos. Esse modo não entra no ranking global; o recorde fica salvo no seu navegador."
+								}
+							},
+							{
+								"@type": "Question",
+								"name": "Os acentos contam?",
+								"acceptedAnswer": {
+									"@type": "Answer",
+									"text": "Sim. Cada nível cobra um tipo de acentuação: leve no iniciante, moderada no amador e complexa no expert. Maiúsculas e minúsculas não fazem diferença."
+								}
+							},
+							{
+								"@type": "Question",
+								"name": "O ranking é anônimo?",
+								"acceptedAnswer": {
+									"@type": "Answer",
+									"text": "Sim. Você pode jogar sem cadastro. Para aparecer no ranking, basta informar um apelido opcional ao final da partida."
+								}
+							}
+						]
+					}
+				]
+			}
+		</script>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>
