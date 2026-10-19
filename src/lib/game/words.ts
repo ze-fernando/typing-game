@@ -1,0 +1,131 @@
+export const WORDS = {
+	iniciante: [
+		'casa',
+		'bola',
+		'gato',
+		'mesa',
+		'livro',
+		'porta',
+		'amigo',
+		'carro',
+		'janela',
+		'comida'
+	],
+	amador: [
+		'árvore',
+		'coração',
+		'fácil',
+		'rápido',
+		'açúcar',
+		'história',
+		'máquina',
+		'pássaro',
+		'almoço',
+		'ônibus',
+		'próximo',
+		'você',
+		'família',
+		'difícil',
+		'atenção'
+	],
+	expert: [
+		'extraordinário',
+		'consequência',
+		'imprescindível',
+		'inconstitucional',
+		'idiossincrasia',
+		'paralelepípedo',
+		'otorrinolaringologista',
+		'eletroencefalograma',
+		'desoxirribonucleico',
+		'anticonstitucionalissimamente',
+		'procrastinação',
+		'exequibilidade',
+		'inexorável',
+		'perspectiva',
+		'ressarcimento',
+		'ubiquidade',
+		'circunstância',
+		'efervescência',
+		'convalescença',
+		'interdisciplinaridade',
+		'jurisprudência',
+		'obsolescência',
+		'heterogeneidade',
+		'quintessência',
+		'magnificência',
+		'idoneidade',
+		'ininteligível',
+		'reivindicação',
+		'psicopedagógico',
+		'transcendência'
+	],
+	extras: [
+		'pato',
+		'dedo',
+		'fogo',
+		'mesa',
+		'rede',
+		'copo',
+		'leite',
+		'papel',
+		'sapato',
+		'amarelo',
+		'escola',
+		'cidade',
+		'trabalho',
+		'teclado',
+		'computador',
+		'amizade',
+		'saúde',
+		'vizinhança',
+		'paciência',
+		'privilégio',
+		'linguiça',
+		'frequência',
+		'trânsito',
+		'herói',
+		'juízo',
+		'órgão',
+		'pôr',
+		'tênue',
+		'âmbito',
+		'veemência',
+		'paradoxal',
+		'beneplácito',
+		'idiossincrático',
+		'inóspito',
+		'circunspecto',
+		'perscrutar',
+		'despretensiosamente',
+		'incomensurabilidade',
+		'inconstitucionalidade',
+		'esternocleidomastoideo',
+		'pneumoultramicroscopicossilicovulcanoconiótico',
+		'anticoncepcional',
+		'desproporcionalidade',
+		'extraoficialmente',
+		'otorrinolaringologia'
+	]
+} as const;
+
+export type WordPoolId = keyof typeof WORDS;
+
+/**
+ * O pool personalizado combina as quatro listas exatamente como documentadas.
+ * São 100 entradas e 99 palavras únicas, porque "mesa" aparece em iniciante e extras.
+ */
+export const CUSTOM_POOL: readonly string[] = [
+	...WORDS.iniciante,
+	...WORDS.amador,
+	...WORDS.expert,
+	...WORDS.extras
+];
+
+export const WORD_COUNTS = {
+	iniciante: WORDS.iniciante.length,
+	amador: WORDS.amador.length,
+	expert: WORDS.expert.length,
+	extras: WORDS.extras.length,
+	custom: CUSTOM_POOL.length
+} as const;
