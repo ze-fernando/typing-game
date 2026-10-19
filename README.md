@@ -14,10 +14,12 @@ A documentação de produto, arquitetura e decisões está em [`docs/`](./docs),
 - [SvelteKit 3](https://svelte.dev/docs/kit) + Svelte 5 (runes) + TypeScript estrito
 - Tailwind CSS 4 com tokens de tema em `src/app.css`
 - `@sveltejs/adapter-netlify` (Netlify Functions + CDN)
-- [Netlify Database](https://docs.netlify.com/build/data-and-storage/netlify-database/) para o ranking global (`@netlify/database`)
+- [Neon](https://neon.com) como Postgres do ranking global, via `@neondatabase/serverless` e `DATABASE_URL`
 - Zod para validação compartilhada entre cliente e servidor
 - Vitest + Testing Library (unitários) e Playwright (E2E)
 - Áudio sintetizado via Web Audio API (sem arquivos de mídia)
+
+> **Por que não o Netlify Database?** O recurso passou a exigir plano com créditos e o deploy falha ao provisionar em contas free (`database feature not available for this account`). O Neon é a mesma tecnologia por trás do Netlify Database e tem plano gratuito.
 
 ## Requisitos
 
@@ -35,17 +37,17 @@ Abra `http://localhost:5173`.
 
 ## Scripts
 
-| Script             | O que faz                                                   |
-| ------------------ | ----------------------------------------------------------- |
-| `npm run dev`      | Servidor de desenvolvimento com HMR                         |
-| `npm run build`    | Build de produção (saída Netlify em `build/` e `.netlify/`) |
-| `npm run preview`  | Pré-visualiza o build de produção                           |
-| `npm run check`    | `svelte-kit sync` + `svelte-check` (tipos e a11y)           |
-| `npm run lint`     | Prettier (`--check`) + ESLint                               |
-| `npm run format`   | Formata o projeto com Prettier                              |
-| `npm run test`     | Testes unitários (Vitest)                                   |
-| `npm run test:e2e` | Testes E2E (Playwright) contra o build de produção          |
-| `npm run db:apply` | Aplica as migrações do Netlify Database (requer CLI logada) |
+| Script             | O que faz                                                    |
+| ------------------ | ------------------------------------------------------------ |
+| `npm run dev`      | Servidor de desenvolvimento com HMR                          |
+| `npm run build`    | Build de produção (saída Netlify em `build/` e `.netlify/`)  |
+| `npm run preview`  | Pré-visualiza o build de produção                            |
+| `npm run check`    | `svelte-kit sync` + `svelte-check` (tipos e a11y)            |
+| `npm run lint`     | Prettier (`--check`) + ESLint                                |
+| `npm run format`   | Formata o projeto com Prettier                               |
+| `npm run test`     | Testes unitários (Vitest)                                    |
+| `npm run test:e2e` | Testes E2E (Playwright) contra o build de produção           |
+| `npm run db:apply` | Aplica as migrações de `db/migrations` usando `DATABASE_URL` |
 
 Antes do primeiro `npm run test:e2e`, instale o navegador do Playwright:
 
@@ -60,23 +62,27 @@ Copie `.env.example` para `.env` e ajuste conforme necessário.
 | Variável          | Obrigatória | Descrição                                                                                                |
 | ----------------- | ----------- | -------------------------------------------------------------------------------------------------------- |
 | `PUBLIC_SITE_URL` | não         | URL pública usada em canonical, sitemap, robots e Open Graph. Padrão: `https://typing-game.netlify.app`. |
+| `DATABASE_URL`    | não         | Conexão Postgres (Neon) do ranking. Sem ela, a API responde `503` e o jogo usa apenas recordes locais.   |
 
-A variável é declarada em `src/env.ts` (SvelteKit 3) como pública e estática: o valor é embutido no build. Nenhum segredo é exposto ao cliente — o banco é acessado apenas via rotas de servidor (`src/routes/api/*`).
+As variáveis são declaradas em `src/env.ts` (SvelteKit 3): `PUBLIC_SITE_URL` é pública e estática (embutida no build); `DATABASE_URL` é privada e lida em runtime, acessível apenas pelo servidor (`src/lib/server/*`). Nenhum segredo é exposto ao cliente — o banco é acessado somente via rotas de servidor (`src/routes/api/*`).
 
-## Ranking e Netlify Database
+## Ranking e banco (Neon)
 
 - Endpoints: `GET /api/leaderboard?nivel=iniciante|amador|expert&limite=1..20` e `POST /api/scores`.
-- Migração: `netlify/database/migrations/20261019120000_create_leaderboard_scores.sql`.
-- Em produção, o Netlify Database é provisionado automaticamente pelo site; rode as migrações com a CLI logada:
+- Migração: `db/migrations/20261019120000_create_leaderboard_scores.sql` (idempotente).
+- O driver `@neondatabase/serverless` fala HTTP com o Postgres, ideal para Netlify Functions; consultas sempre parametrizadas por tagged template.
+
+Para configurar o ranking:
+
+1. Crie um projeto gratuito em [neon.com](https://neon.com) e copie a connection string.
+2. Defina `DATABASE_URL` no `.env` (desenvolvimento) e nas variáveis de ambiente da Netlify (produção).
+3. Aplique a migração apontando para o banco desejado:
 
 ```sh
-npx netlify link
-npx netlify database migrations apply
-# ou
 npm run db:apply
 ```
 
-Sem banco configurado (por exemplo, ambiente local sem `netlify dev`), a API responde `503` e o jogo continua funcionando com recordes locais em `localStorage`. Partidas do modo personalizado nunca são enviadas ao ranking.
+Sem banco configurado, a API responde `503` e o jogo continua funcionando com recordes locais em `localStorage`. Partidas do modo personalizado nunca são enviadas ao ranking.
 
 ## Estrutura
 
@@ -89,7 +95,7 @@ src/
     api/                 # cliente HTTP do ranking
     components/          # UI, modais, teclado, cenário, SEO
     game/                # regras puras: palavras, níveis, baralho, pontuação, teclado ABNT2
-    server/              # acesso ao Netlify Database, ranking e rate limit
+    server/              # acesso ao banco (Neon), ranking e rate limit
     stores/              # estado global (settings, ui, jogo)
     utils/               # recordes locais
     validation.ts        # schemas Zod compartilhados
@@ -100,25 +106,18 @@ src/
     robots.txt/          # robots gerado
     sitemap.xml/         # sitemap gerado
 e2e/                     # testes Playwright
-netlify/database/        # migrações do banco
+db/migrations/           # migrações SQL do Postgres (Neon)
+scripts/                 # utilitário para aplicar migrações
 docs/                    # documentação e reviews
 ```
-
-## Integração contínua
-
-O repositório inclui `.github/workflows/ci.yml`, que roda o gate de review a cada push para `main` e em pull requests:
-
-`check` → `lint` → `test` → `build` → `test:e2e` (Chromium, com relatório publicado em caso de falha).
-
-Recomendado proteger a branch `main` exigindo o job **Gate** e o deploy preview da Netlify antes do merge. Migrações de banco continuam manuais (`npm run db:apply`) para não alterar schema em deploys de preview.
 
 ## Deploy
 
 1. Crie o site na Netlify e conecte o repositório (a configuração está em `netlify.toml`).
 2. Defina `PUBLIC_SITE_URL` com a URL de produção.
-3. Provisione o Netlify Database e rode `npm run db:apply` (ou `npx netlify database migrations apply`).
+3. Crie o projeto Neon, defina `DATABASE_URL` na Netlify e rode `npm run db:apply` para criar a tabela.
 4. Valide o deploy preview e depois promova para produção.
-5. Rollback: use o histórico de deploys da Netlify ("Publish deploy") para voltar à versão anterior; o banco mantém a compatibilidade porque as migrações são aditivas.
+5. Rollback: use o histórico de deploys da Netlify ("Publish deploy") para voltar à versão anterior; o schema é aditivo e não é removido no rollback.
 
 ## Acessibilidade e desempenho
 

@@ -12,3 +12,4 @@
 - **Correções aplicadas:** parser e guardas sem Zod no cliente; confirmação de imports de servidor apenas em `+server.ts`.
 - **Evidências (screenshots/logs):** nenhum chunk do cliente contém Zod após o build; E2E "ranking na home" (sucesso e fallback).
 - **Resultado final:** aprovado (provisionamento do banco é pendência manual).
+- **Atualização (2026-10-19, pós-fase 7):** o Netlify Database passou a exigir plano com créditos e o deploy falhava ao provisionar (`database feature not available for this account`). O acesso foi migrado para Neon (`@neondatabase/serverless` + `DATABASE_URL`), com migração idempotente em `db/migrations` aplicada por `npm run db:apply`. Endpoints, validação e fallback `503` inalterados.

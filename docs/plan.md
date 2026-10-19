@@ -4,10 +4,12 @@
 - **Data:** 19/10/2026
 - **Fontes:** `docs/intro.md`, `docs/stack.md`, `docs/visual.md` e referências em `docs/assets/`
 - **Stack:** SvelteKit 3 + Svelte 5 + TypeScript + Tailwind CSS 4
-- **Deploy:** Netlify + Netlify Database
+- **Deploy:** Netlify + Postgres (Neon) via `DATABASE_URL`
 - **Objetivo:** entregar um jogo de digitação em português, responsivo, acessível e com boa indexação, com três níveis fixos, modo personalizado, teclado interativo, áudio, ranking e deploy na Netlify.
 
 > Este documento é a fonte de verdade para execução e revisão. Nenhuma fase é considerada concluída sem passar pelo gate de code review descrito na seção 10.
+
+> **Nota (2026-10-19, pós-fase 7):** o Netlify Database passou a exigir plano com créditos e o provisionamento automático falha em contas free (`database feature not available for this account`), derrubando o build. O ranking foi migrado para um Postgres **Neon** via `@neondatabase/serverless` + `DATABASE_URL`, com migrações em `db/migrations` aplicadas por `npm run db:apply`. Schema, endpoints e fallback `503` continuam iguais.
 
 ---
 
@@ -15,7 +17,7 @@
 
 O jogo apresenta uma landing page com fundo animado de teclas em parallax e um botão **Iniciar** que abre a escolha de nível. A partida acontece em uma tela com cenário de mesa de computador, teclado virtual interativo e foco total na palavra atual. O jogador digita palavras em português dentro do tempo do nível; ao final, vê velocidade (WPM), precisão, palavras concluídas e pode salvar o resultado no ranking.
 
-A aplicação é **frontend-first**: toda a lógica do jogo roda no navegador. Não existe backend separado. As únicas rotas de servidor são endpoints do próprio SvelteKit, executados como Netlify Functions, para ler e gravar o ranking no Netlify Database (Postgres/Neon).
+A aplicação é **frontend-first**: toda a lógica do jogo roda no navegador. Não existe backend separado. As únicas rotas de servidor são endpoints do próprio SvelteKit, executados como Netlify Functions, para ler e gravar o ranking no Postgres do ranking (Neon, acessado via `DATABASE_URL`).
 
 ---
 
@@ -36,10 +38,10 @@ A aplicação é **frontend-first**: toda a lógica do jogo roda no navegador. N
 | RF-09 | Tela de jogo com cenário de mesa de computador inspirado em `docs/assets/`.                                    | 4     |
 | RF-10 | Teclado visual interativo: teclas físicas animam, mouse/toque pressionam, Enter e Espaço têm animação própria. | 4     |
 | RF-11 | Tema claro (azul-marinho + preto) e escuro (azul-marinho + branco), com persistência.                          | 1     |
-| RF-12 | Ranking global por nível no Netlify Database + recordes locais.                                                | 5     |
+| RF-12 | Ranking global por nível (Postgres/Neon) + recordes locais.                                                    | 5     |
 | RF-13 | Layout moderno, bonito, responsivo de 360 px a telas grandes.                                                  | 1 a 6 |
 | RF-14 | Boa indexação e SEO: SSR/prerender, metadados, sitemap, robots, dados estruturados.                            | 6     |
-| RF-15 | Deploy na Netlify com banco provisionado e migrações.                                                          | 7     |
+| RF-15 | Deploy na Netlify com banco (Neon) provisionado e migrações.                                                   | 7     |
 | RF-16 | Code review obrigatório ao final de cada fase, com ciclo corrigir → rodar novamente.                           | Todas |
 
 ### 2.2 Requisitos não funcionais
@@ -88,13 +90,13 @@ A aplicação é **frontend-first**: toda a lógica do jogo roda no navegador. N
 - **SvelteKit 3.x** com **Svelte 5** (runes: `$state`, `$derived`, `$effect`, `$props`) e TypeScript estrito.
 - **Tailwind CSS 4** via `@tailwindcss/vite` e tokens em CSS custom properties.
 - **@sveltejs/adapter-netlify** para deploy.
-- **@netlify/database** para acesso ao Postgres gerenciado (driver nativo + `sql` parametrizado).
+- **@neondatabase/serverless** (Neon) para acesso ao Postgres do ranking (driver HTTP + tagged template parametrizado).
 - **Vitest + Testing Library** para unidade/componentes; **Playwright** para E2E.
 - **ESLint 9 (flat config) + Prettier**.
 - **lucide-svelte** para ícones; **@fontsource-variable/inter** e **@fontsource/jetbrains-mono** (self-hosted, subset latin-ext).
 - **Zod** para validação de payloads e configurações persistidas.
 
-Versões de referência em outubro/2026: SvelteKit 3.1, Svelte 5.57, Tailwind 4.3, adapter-netlify 7, `@netlify/database` 2. Fixar tudo no `package-lock.json`.
+Versões de referência em outubro/2026: SvelteKit 3.1, Svelte 5.57, Tailwind 4.3, adapter-netlify 7, `@neondatabase/serverless` 1.2. Fixar tudo no `package-lock.json`.
 
 ### 3.2 Desenho da solução
 
@@ -105,13 +107,13 @@ Navegador
 └── fetch → /api/leaderboard e /api/scores
                  │
                  └── SvelteKit server (Netlify Functions)
-                         └── @netlify/database → Postgres (Netlify)
+                         └── @neondatabase/serverless → Postgres (Neon)
 ```
 
 - A landing page e as páginas institucionais usam SSR/prerender para SEO.
 - O jogo é hidratado no cliente e funciona mesmo se o banco estiver indisponível.
 - O banco é usado apenas para ranking; não é necessário para iniciar ou concluir uma partida.
-- Deploy previews da Netlify recebem automaticamente um branch isolado do banco.
+- Deploy previews usam o mesmo banco de produção (sem branches automáticos, que eram exclusivos do Netlify Database).
 
 ### 3.3 Estado e organização
 
@@ -410,11 +412,11 @@ precisão = (1 - erros de caractere / caracteres comparados) × 100
 
 ---
 
-## 8. Dados, API e Netlify Database
+## 8. Dados, API e Postgres (Neon)
 
 ### 8.1 Schema
 
-Migração em `netlify/database/migrations/<timestamp>_create_leaderboard_scores.sql`:
+Migração em `db/migrations/<timestamp>_create_leaderboard_scores.sql` (idempotente, aplicada com `npm run db:apply`):
 
 ```sql
 CREATE TABLE leaderboard_scores (
@@ -437,7 +439,7 @@ CREATE INDEX leaderboard_scores_ranking_idx
 
 - `id` de banco é permitido; a restrição de IDs vale para o DOM.
 - Sem tabela de usuários, sem e-mail, sem IP.
-- Migrações são aplicadas automaticamente pela Netlify em produção e em deploy previews.
+- Migrações são aplicadas manualmente com `npm run db:apply` (usa `DATABASE_URL`); a Netlify não provisiona mais banco.
 
 ### 8.2 Endpoints
 
@@ -490,30 +492,30 @@ Payload:
 ### 8.3 Acesso ao banco
 
 ```ts
-// src/lib/server/db.ts
-import { getDatabase } from '@netlify/database';
+// src/lib/server/db.ts (resumo)
+import { neon } from '@neondatabase/serverless';
+import { DATABASE_URL } from '$app/env/private';
 
-export function getDb() {
-	return getDatabase().sql;
+export function getSql() {
+	if (!DATABASE_URL) return null;
+	return neon(DATABASE_URL);
 }
 ```
 
 - Todo acesso fica em `src/lib/server/`, nunca importado pelo cliente.
 - Consultas sempre parametrizadas via tagged template.
 - Sem ORM e sem transações no MVP (apenas insert/select simples).
-- `@netlify/database` usa o branch correto automaticamente em produção e preview.
-- Desenvolvimento local: `netlify dev` + banco local provisionado por `netlify database init`.
+- `DATABASE_URL` é privada, lida em runtime via `$app/env/private`; sem ela a API responde `503`.
+- Desenvolvimento local: defina `DATABASE_URL` no `.env` (projeto Neon próprio) e rode `npm run db:apply`.
 
 ### 8.4 Comandos de banco
 
 ```bash
-npm install @netlify/database
-npx netlify database init --yes
-npx netlify database migrations new --description "create leaderboard scores" --scheme timestamp
-npx netlify database migrations apply
+npm install @neondatabase/serverless
+npm run db:apply   # aplica db/migrations usando DATABASE_URL
 ```
 
-- `NETLIFY_DB_URL` é injetada pela Netlify; não expor em variáveis públicas.
+- `DATABASE_URL` é privada (somente servidor); não expor em variáveis públicas.
 - `PUBLIC_SITE_URL` é a única variável pública necessária.
 
 ### 8.5 Ranking e fallback
@@ -530,7 +532,7 @@ npx netlify database migrations apply
 
 Cada fase termina com o **gate de review** da seção 10. As estimativas são indicativas e incluem revisão.
 
-**Status em 2026-10-19:** fases 0 a 6 implementadas e aprovadas nos gates locais (`check`, `lint`, `test`, `build` e `test:e2e`); fase 7 com pendências manuais de conta Netlify (criar site, provisionar banco, deploy e smoke test). Registros completos em `docs/reviews/`.
+**Status em 2026-10-19:** fases 0 a 6 implementadas e aprovadas nos gates locais (`check`, `lint`, `test`, `build` e `test:e2e`); site criado e conectado ao repositório na Netlify, com o provisionamento do banco migrado para Neon (ver nota no topo). Pendências manuais: `DATABASE_URL` + migração, `PUBLIC_SITE_URL`, deploy e smoke test. Registros completos em `docs/reviews/`.
 
 ### Fase 0 — Fundação do projeto (0,5 dia)
 
@@ -598,9 +600,9 @@ Cada fase termina com o **gate de review** da seção 10. As estimativas são in
 
 **Aceite:** RF-09 e RF-10 atendidos; teclado físico e virtual funcionam juntos; Enter/Espaço animam; mouse/toque pressionam; áudio só após gesto; toggles funcionam; mobile sem overflow; 60 fps em desktop médio.
 
-### Fase 5 — Ranking e Netlify Database (0,5–1 dia)
+### Fase 5 — Ranking e banco de dados (0,5–1 dia)
 
-- [ ] `netlify database init --yes` e migração de `leaderboard_scores`. _(pendente: requer CLI autenticada)_
+- [x] Migração `leaderboard_scores` em `db/migrations` e `npm run db:apply`. _(adaptado: Netlify Database exige plano com créditos; banco migrado para Neon — ver nota no topo)_
 - [x] `src/lib/server/db.ts` e `src/lib/server/leaderboard.ts`.
 - [x] `GET /api/leaderboard` e `POST /api/scores` com Zod, limites e respostas de erro.
 - [x] Proteções básicas: validação estrita, normalização de apelido, limite de taxa best-effort e cache de leitura.
@@ -626,15 +628,15 @@ Cada fase termina com o **gate de review** da seção 10. As estimativas são in
 
 ### Fase 7 — Deploy e entrega (0,5 dia)
 
-- [ ] Criar site na Netlify e conectar o repositório. _(manual: requer conta Netlify)_
-- [ ] Provisionar Netlify Database e rodar migrações. _(manual: requer conta Netlify)_
+- [x] Criar site na Netlify e conectar o repositório. _(feito em 19/10/2026; primeiro build falhou no provisionamento automático do Netlify Database)_
+- [ ] Criar projeto Neon, definir `DATABASE_URL` (local e Netlify) e aplicar a migração (`npm run db:apply`). _(manual: requer conta Neon)_
 - [ ] Configurar `PUBLIC_SITE_URL`, build e adapter. _(manual: requer conta Netlify)_
 - [ ] Validar deploy preview e depois produção. _(manual: requer conta Netlify)_
 - [ ] Smoke test: home, jogo, configurações, ranking e banco. _(manual: requer conta Netlify)_
 - [x] Documentar deploy e variáveis no README.
 - [x] Revisão final e atualização deste plano.
 
-**Aceite:** URL de produção funcional; banco gravando/lendo; deploy preview isolado; rollback documentado; todos os requisitos rastreáveis atendidos.
+**Aceite:** URL de produção funcional; banco gravando/lendo; deploy preview funcional; rollback documentado; todos os requisitos rastreáveis atendidos.
 
 ---
 
@@ -797,18 +799,18 @@ Regras:
 
 ## 12. Riscos e mitigação
 
-| Risco                                                | Impacto                        | Mitigação                                                                                                 |
-| ---------------------------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| Fundo animado pesado em celulares                    | Travamentos e queda de SEO     | Camadas limitadas, `transform`/`opacity`, pausa fora da tela, reduced motion, testes em dispositivo real. |
-| Expert quase impossível (30 palavras longas em 40 s) | Frustração                     | Baralho é um pool, não meta obrigatória; resultado mostra progresso; ajustar apenas com dados de uso.     |
-| Teclas mortas/acentos no ABNT2                       | Não conseguir digitar palavras | Composition events, input nativo, teclado virtual com acentos, testes em ABNT2 e US.                      |
-| Teclado nativo do celular cobrir a tela              | UI inutilizável                | Layout compacto, `visualViewport`, palavra fixa no topo, teclado virtual como alternativa.                |
-| Abuso do ranking                                     | Ranking inútil                 | Validação estrita, recálculo no servidor, limites plausíveis, rate limit best-effort, sem prêmios.        |
-| Custo/disponibilidade do Netlify Database            | Ranking fora do ar             | Jogo e recordes locais independentes; fallback visual; cache de leitura.                                  |
-| SEO de jogo client-side                              | Pouca indexação                | Landing SSR/prerender com conteúdo real, metadados, sitemap e JSON-LD.                                    |
-| Fontes sem acentos                                   | Texto quebrado                 | Subset latin-ext e teste com palavras acentuadas.                                                         |
-| Escopo crescer (contas, multiplayer, i18n)           | Atraso                         | Lista de fora de escopo e backlog pós-MVP.                                                                |
-| “Sem ID” conflitar com acessibilidade                | Barreira                       | Preferir `aria-label` e semântica; se um ID for inevitável, documentar e usar só para relação acessível.  |
+| Risco                                                | Impacto                        | Mitigação                                                                                                                 |
+| ---------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| Fundo animado pesado em celulares                    | Travamentos e queda de SEO     | Camadas limitadas, `transform`/`opacity`, pausa fora da tela, reduced motion, testes em dispositivo real.                 |
+| Expert quase impossível (30 palavras longas em 40 s) | Frustração                     | Baralho é um pool, não meta obrigatória; resultado mostra progresso; ajustar apenas com dados de uso.                     |
+| Teclas mortas/acentos no ABNT2                       | Não conseguir digitar palavras | Composition events, input nativo, teclado virtual com acentos, testes em ABNT2 e US.                                      |
+| Teclado nativo do celular cobrir a tela              | UI inutilizável                | Layout compacto, `visualViewport`, palavra fixa no topo, teclado virtual como alternativa.                                |
+| Abuso do ranking                                     | Ranking inútil                 | Validação estrita, recálculo no servidor, limites plausíveis, rate limit best-effort, sem prêmios.                        |
+| Custo/disponibilidade do banco de ranking            | Ranking fora do ar             | Jogo e recordes locais independentes; fallback visual; cache de leitura; Neon gratuito substitui o Netlify Database pago. |
+| SEO de jogo client-side                              | Pouca indexação                | Landing SSR/prerender com conteúdo real, metadados, sitemap e JSON-LD.                                                    |
+| Fontes sem acentos                                   | Texto quebrado                 | Subset latin-ext e teste com palavras acentuadas.                                                                         |
+| Escopo crescer (contas, multiplayer, i18n)           | Atraso                         | Lista de fora de escopo e backlog pós-MVP.                                                                                |
+| “Sem ID” conflitar com acessibilidade                | Barreira                       | Preferir `aria-label` e semântica; se um ID for inevitável, documentar e usar só para relação acessível.                  |
 
 ---
 
