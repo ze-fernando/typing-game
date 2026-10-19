@@ -15,7 +15,7 @@
 
 ## 1. Resumo do produto
 
-O jogo apresenta uma landing page com fundo animado de teclas em parallax e um botão **Iniciar** que abre a escolha de nível. A partida acontece em uma tela com cenário de mesa de computador, teclado virtual interativo e foco total na palavra atual. O jogador digita palavras em português dentro do tempo do nível; ao final, vê velocidade (WPM), precisão, palavras concluídas e pode salvar o resultado no ranking.
+O jogo apresenta uma tela de início com fundo animado de teclas em parallax e um menu de níveis com início imediato e atalhos de teclado (1–4). A partida acontece em uma tela com uma cena minimalista de superfície, teclado virtual interativo e foco total na palavra atual. O jogador digita palavras em português dentro do tempo do nível; ao final, vê velocidade (WPM), precisão, palavras concluídas e pode salvar o resultado no ranking.
 
 A aplicação é **frontend-first**: toda a lógica do jogo roda no navegador. Não existe backend separado. As únicas rotas de servidor são endpoints do próprio SvelteKit, executados como Netlify Functions, para ler e gravar o ranking no Postgres do ranking (Neon, acessado via `DATABASE_URL`).
 
@@ -30,12 +30,12 @@ A aplicação é **frontend-first**: toda a lógica do jogo roda no navegador. N
 | RF-01 | Três níveis: iniciante (10 palavras, 35 s), amador (15 palavras, 30 s) e expert (30 palavras, 40 s).           | 3     |
 | RF-02 | Banco de palavras em português com acentuação progressiva: leve, moderada e complexa.                          | 3     |
 | RF-03 | Modo personalizado com 1 a 100 palavras e 5 a 120 segundos.                                                    | 2 e 3 |
-| RF-04 | Botão **Iniciar** abre modal de escolha de nível.                                                              | 2     |
+| RF-04 | Menu de níveis na home inicia a partida direto; **Personalizado** abre o modal.                                | 2     |
 | RF-05 | Home com fundo animado, parallax e teclas se movendo (não apenas bolhas).                                      | 2     |
 | RF-06 | Modal de **Configurações** para ativar/desativar música e efeitos de teclas.                                   | 2 e 4 |
-| RF-07 | Botão **Desenvolvedor** com link para `https://zioncodes.squareweb.app`.                                       | 2     |
+| RF-07 | Link do desenvolvedor para `https://zioncodes.squareweb.app` no rodapé.                                        | 2     |
 | RF-08 | Rodapé com `© {ano atual} ZionCodes Todos os direitos reservados`.                                             | 1     |
-| RF-09 | Tela de jogo com cenário de mesa de computador inspirado em `docs/assets/`.                                    | 4     |
+| RF-09 | Tela de jogo com cena minimalista de teclado, sem adereços decorativos.                                        | 4     |
 | RF-10 | Teclado visual interativo: teclas físicas animam, mouse/toque pressionam, Enter e Espaço têm animação própria. | 4     |
 | RF-11 | Tema claro (azul-marinho + preto) e escuro (azul-marinho + branco), com persistência.                          | 1     |
 | RF-12 | Ranking global por nível (Postgres/Neon) + recordes locais.                                                    | 5     |
@@ -223,7 +223,7 @@ typing-game/
 | `--key-bg`        | `#080D16` | `#0B1322` | Teclas                  |
 | `--key-text`      | `#FFFFFF` | `#FFFFFF` | Legendas das teclas     |
 
-- O cenário da mesa tem paleta própria (madeira, mousepad, preto, azul-marinho) para manter a referência visual; os painéis de UI seguem o tema.
+- A cena do teclado usa os tokens do próprio tema (fundo elevado, grade sutil e brilho suave), sem adereços decorativos; os painéis de UI seguem o tema.
 - Contrastes devem ser validados com ferramenta (mínimo AA; ideal AAA para texto da palavra).
 
 ### 5.3 Tipografia e escalas
@@ -278,24 +278,23 @@ typing-game/
 ### 6.1 Home (`/`)
 
 - Header com marca, alternador de tema e botão de configurações.
-- Hero com:
-  - título forte e subtítulo explicando o jogo;
-  - CTA **Iniciar**;
-  - CTA secundário **Desenvolvedor** (`target="_blank"`, `rel="noopener noreferrer"`);
-  - indicadores “3 níveis”, “modo personalizado”, “ranking”.
+- Hero compacto: título curto e uma linha de apoio, sem CTAs de marketing nem selos.
+- Menu de níveis em lista, com início imediato por item:
+  - iniciante, amador e expert com palavras, tempo, acentuação e melhor recorde local;
+  - “Personalizado” abre o modal de partida personalizada;
+  - atalhos de teclado 1–4.
+- Painel único de ranking: abas por nível, top 10 e botão de atualizar.
+- Conteúdo enxuto para SEO: instruções em uma linha e FAQ curta em `details`.
 - Fundo animado com teclas em pelo menos três camadas de profundidade, parallax suave e movimento contínuo.
-- Seções de apoio para SEO: como jogar, níveis, recursos e FAQ curta.
-- Rodapé com `© {ano} ZionCodes Todos os direitos reservados`; ano calculado em runtime e corrigido no cliente para virar o ano sem novo deploy.
+- Rodapé com `© {ano} ZionCodes Todos os direitos reservados`; ano calculado em runtime e corrigido no cliente para virar o ano sem novo deploy; link do desenvolvedor (`target="_blank"`, `rel="noopener noreferrer"`).
+- _Revisão 2026-10-19: a home deixa de ser landing page; indicadores e CTA secundário do hero saem, as seções “como jogar”, “níveis” e “recursos” viram o próprio menu e o link do desenvolvedor fica só no rodapé._
 
-### 6.2 Modal de níveis
+### 6.2 Modal de partida personalizada
 
-- Cards para iniciante, amador e expert com quantidade de palavras, tempo, descrição da acentuação e melhor resultado local.
-- Card/aba **Personalizado** com:
-  - palavras: 1–100 (stepper e slider);
-  - tempo: 5–120 s (stepper e slider);
-  - resumo dinâmico e validação inline;
-  - aviso de que não entra no ranking global.
-- Botão inicia a partida via `/jogar?nivel=...`; personalizado acrescenta `&palavras=N&tempo=S`.
+- Aberto pelo item “Personalizado” do menu da home (ou atalho 4).
+- Sliders de palavras (1–100) e tempo (5–120 s) com resumo dinâmico.
+- Aviso de que o modo não entra no ranking global e o recorde fica no navegador.
+- Botão inicia a partida via `/jogar?nivel=personalizado&palavras=N&tempo=S`.
 - Parâmetros inválidos nunca quebram a página: exibem mensagem e CTA para voltar à escolha.
 
 ### 6.3 Modal de configurações
@@ -311,7 +310,7 @@ typing-game/
 
 - Top bar: voltar (com confirmação se a partida estiver em andamento), nível, timer, progresso, precisão e pausa.
 - Card central com a palavra atual e feedback letra a letra.
-- Cena de mesa com teclado interativo; mouse ilustrado e caneca como elementos de ambientação.
+- Cena minimalista de superfície com o teclado interativo em destaque; sem adereços decorativos.
 - Contagem regressiva 3-2-1 antes de liberar a digitação; o timer do nível só começa depois.
 - Pausa manual e automática ao trocar de aba (`visibilitychange`), com overlay de retomada.
 - Mobile: HUD compacto, palavra fixa na parte superior e teclado na parte inferior.
@@ -520,7 +519,7 @@ npm run db:apply   # aplica db/migrations usando DATABASE_URL
 
 ### 8.5 Ranking e fallback
 
-- Ranking global exibido na home (preview do top 3) e nos resultados (top 10 do nível).
+- Ranking global exibido na home (top 10 com abas por nível) e nos resultados (top 10 do nível).
 - Recordes locais por nível em `localStorage` (`typing-game:bests:v1`), sempre exibidos.
 - Modo personalizado não envia resultado.
 - Se a API falhar, o componente de ranking mostra estado de erro/vazio e o jogo segue normalmente.
@@ -533,6 +532,8 @@ npm run db:apply   # aplica db/migrations usando DATABASE_URL
 Cada fase termina com o **gate de review** da seção 10. As estimativas são indicativas e incluem revisão.
 
 **Status em 2026-10-19:** fases 0 a 6 implementadas e aprovadas nos gates locais (`check`, `lint`, `test`, `build` e `test:e2e`); site criado e conectado ao repositório na Netlify, com o provisionamento do banco migrado para Neon (ver nota no topo). Pendências manuais: `DATABASE_URL` + migração, `PUBLIC_SITE_URL`, deploy e smoke test. Registros completos em `docs/reviews/`.
+
+> Revisão visual de 2026-10-19: home com menu de níveis direto e atalhos 1–4, cena do teclado minimalista (sem adereços) e ranking/modal personalizado enxutos — detalhes na seção 6.
 
 ### Fase 0 — Fundação do projeto (0,5 dia)
 
@@ -563,9 +564,9 @@ Cada fase termina com o **gate de review** da seção 10. As estimativas são in
 ### Fase 2 — Home, níveis e configurações (1–1,5 dia)
 
 - [x] Fundo animado `BackgroundKeys` com três camadas, parallax de ponteiro e pausa fora da tela.
-- [x] Hero, CTAs, seção “como jogar”, níveis, recursos e FAQ.
-- [x] Botão Desenvolvedor com link externo seguro.
-- [x] Modal de níveis com os três cards e o modo personalizado validado.
+- [x] Hero, menu de níveis, ranking e FAQ (revisão 2026-10-19: layout enxuto, início direto e atalhos 1–4).
+- [x] Link do desenvolvedor com segurança (`rel="noopener noreferrer"`), no rodapé.
+- [x] Modal de partida personalizada com validação (os níveis fixos iniciam direto do menu).
 - [x] Navegação para `/jogar` com query params validados.
 - [x] Modal de configurações com música, efeitos e tema.
 - [x] Persistência de preferências (`typing-game:settings:v1`).
@@ -589,11 +590,11 @@ Cada fase termina com o **gate de review** da seção 10. As estimativas são in
 
 ### Fase 4 — Cenário, teclado e áudio (1,5–2 dias)
 
-- [x] `DeskScene` em SVG/CSS inspirado nas fotos: madeira, mousepad com mapa, caneca, notebook, mouse e cabos.
+- [x] `DeskScene` minimalista em CSS: superfície do tema, grade sutil e brilho suave (a revisão de 2026-10-19 removeu madeira, mousepad, caneca, notebook, mouse e cabos).
 - [x] `VirtualKeyboard` ABNT2 em camadas 3D, com versão compacta no mobile.
 - [x] Sincronizar teclado físico com teclas visuais (`keydown`/`keyup`, incluindo Enter/Espaço).
 - [x] Teclado virtual insere texto, backspace e envio; mouse/toque animam a tecla.
-- [x] Mouse ilustrado reage ao clique; caneca/steam e cabos com animações sutis.
+- [x] Adereços de cena (mouse ilustrado, caneca/steam e cabos) removidos na revisão minimalista de 2026-10-19.
 - [x] Motor de áudio: SFX e trilha sintetizada, lazy init, toggles e suspensão.
 - [x] Responsividade e `prefers-reduced-motion`.
 - [ ] Medir FPS e reduzir camadas se necessário. _(proxy: Lighthouse TBT 0–250 ms e mobile em 91 de performance; medição direta de FPS fica como verificação manual)_
@@ -755,9 +756,9 @@ Regras:
 
 ### 11.2 Testes E2E (Playwright)
 
-1. Home carrega com título, H1, CTA e ano atual.
-2. Modal de níveis abre/fecha por Escape, backdrop e botão.
-3. Cards mostram 10/35 s, 15/30 s e 30/40 s.
+1. Home carrega com título, H1, menu de níveis e ano atual.
+2. Modal de partida personalizada abre/fecha por Escape, backdrop e botão.
+3. Menu mostra 10/35 s, 15/30 s e 30/40 s; atalhos 1–4 iniciam os níveis.
 4. Personalizado valida limites e inicia com os parâmetros corretos.
 5. Partida iniciante: contagem, digitação da primeira palavra e atualização do HUD.
 6. Palavra errada: feedback, sem avanço, correção e envio.
@@ -766,7 +767,7 @@ Regras:
 9. Pausa manual e automática por visibilidade.
 10. Fim por tempo e por baralho; estatísticas corretas.
 11. Configurações: música/efeitos/tema persistem após reload.
-12. Link Desenvolvedor com URL e `rel` corretos.
+12. Link do desenvolvedor no rodapé com URL e `rel` corretos.
 13. Ranking: envio, top 10 e ordenação (API mockada e/ou banco local).
 14. Falha da API: jogo continua e ranking mostra fallback.
 15. Mobile 360 px: sem overflow, teclado compacto, palavra visível.
