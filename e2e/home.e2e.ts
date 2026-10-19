@@ -16,24 +16,42 @@ test.describe('tela inicial', () => {
 		);
 	});
 
-	test('abre o modal de níveis e inicia o nível iniciante', async ({ page }) => {
+	test('inicia o nível direto pelo menu da home', async ({ page }) => {
 		await page.goto('/');
-		await page.getByRole('button', { name: 'Iniciar agora' }).click();
 
-		const dialog = page.getByRole('dialog');
-		await expect(dialog.getByRole('heading', { name: 'Escolha o nível' })).toBeVisible();
-		await expect(dialog.getByText('10 palavras')).toBeVisible();
-		await expect(dialog.getByText('15 palavras')).toBeVisible();
-		await expect(dialog.getByText('30 palavras')).toBeVisible();
+		const iniciante = page.getByRole('button', { name: /10 palavras/ });
+		await expect(iniciante).toContainText('10 palavras');
+		await expect(iniciante).toContainText('35s');
 
-		await dialog.getByRole('button', { name: /Iniciante/ }).click();
+		await iniciante.click();
 		await expect(page).toHaveURL(/\/jogar\?nivel=iniciante/);
+	});
+
+	test('atalhos 1–4 iniciam os níveis e o personalizado', async ({ page }) => {
+		await page.goto('/');
+
+		// A tecla pode ser pressionada antes da hidratação; repete até a navegação ocorrer.
+		await expect(async () => {
+			await page.keyboard.press('3');
+			await expect(page).toHaveURL(/\/jogar\?nivel=expert/, { timeout: 1000 });
+		}).toPass({ timeout: 15_000 });
+
+		await page.goto('/');
+		await expect(async () => {
+			await page.keyboard.press('4');
+			await expect(page.getByRole('heading', { name: 'Modo personalizado' })).toBeVisible({
+				timeout: 1000
+			});
+		}).toPass({ timeout: 15_000 });
 	});
 
 	test('inicia o modo personalizado com os padrões', async ({ page }) => {
 		await page.goto('/');
-		await page.getByRole('button', { name: 'Iniciar agora' }).click();
-		await page.getByRole('dialog').getByRole('button', { name: 'Jogar personalizado' }).click();
+		await page.getByRole('button', { name: /Personalizado/ }).click();
+
+		const dialog = page.getByRole('dialog');
+		await expect(dialog.getByRole('heading', { name: 'Modo personalizado' })).toBeVisible();
+		await dialog.getByRole('button', { name: 'Jogar personalizado' }).click();
 
 		await expect(page).toHaveURL(/nivel=personalizado/);
 		await expect(page).toHaveURL(/palavras=20/);
@@ -73,9 +91,6 @@ test.describe('tela inicial', () => {
 
 		const year = new Date().getFullYear();
 		await expect(page.getByText(`© ${year} ZionCodes Todos os direitos reservados`)).toBeVisible();
-
-		const devLink = page.getByRole('link', { name: 'Desenvolvedor' });
-		await expect(devLink).toHaveAttribute('href', 'https://zioncodes.squareweb.app');
 
 		const footerLink = page.getByRole('contentinfo').getByRole('link', { name: 'ZionCodes' });
 		await expect(footerLink).toHaveAttribute('href', 'https://zioncodes.squareweb.app');

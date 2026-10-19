@@ -16,12 +16,12 @@ test.describe('acessibilidade', () => {
 		expect(dark.violations).toEqual([]);
 	});
 
-	test('modal de níveis e configurações sem violações', async ({ page }) => {
+	test('modal personalizado e configurações sem violações', async ({ page }) => {
 		await page.goto('/');
 
-		await page.getByRole('button', { name: 'Iniciar agora' }).click();
-		const levelDialog = await new AxeBuilder({ page }).withTags(TAGS).analyze();
-		expect(levelDialog.violations).toEqual([]);
+		await page.getByRole('button', { name: /Personalizado/ }).click();
+		const customDialog = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+		expect(customDialog.violations).toEqual([]);
 		await page.keyboard.press('Escape');
 
 		await page.getByRole('button', { name: 'Configurações' }).click();
