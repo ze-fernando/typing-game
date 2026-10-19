@@ -9,7 +9,6 @@
 		Medal,
 		MousePointerClick,
 		Settings2,
-		Sparkles,
 		Target,
 		Trophy,
 		Zap
@@ -73,13 +72,6 @@
 		<section
 			class="mx-auto flex w-full max-w-6xl flex-col items-center px-4 pt-10 pb-16 text-center sm:px-6 sm:pt-16"
 		>
-			<span
-				class="animate-fade-up mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/80 px-3 py-1.5 text-xs font-semibold text-[var(--text-muted)] shadow"
-			>
-				<Sparkles class="h-3.5 w-3.5 text-[var(--warning)]" aria-hidden="true" />
-				3 níveis • modo personalizado • ranking online
-			</span>
-
 			<h1
 				class="animate-fade-up text-gradient max-w-3xl text-4xl font-black tracking-tight text-balance sm:text-5xl lg:text-6xl"
 			>
