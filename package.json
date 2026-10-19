@@ -21,7 +21,7 @@
 		"test:unit:watch": "vitest",
 		"test:e2e": "playwright test",
 		"test:e2e:install": "playwright install",
-		"db:apply": "netlify database migrations apply"
+		"db:apply": "node scripts/db-apply.js"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.14.0",
@@ -54,7 +54,7 @@
 		"@fontsource-variable/inter": "^5.3.0",
 		"@fontsource-variable/jetbrains-mono": "^5.3.0",
 		"@lucide/svelte": "^1.59.0",
-		"@netlify/database": "^2.0.1",
+		"@neondatabase/serverless": "^1.2.0",
 		"zod": "^4.6.7"
 	},
 	"imports": {

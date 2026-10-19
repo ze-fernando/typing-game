@@ -45,9 +45,7 @@ export async function listScores(level: FixedLevelId, limit: number): Promise<Sc
 		WHERE level = ${level}
 		ORDER BY wpm DESC, accuracy DESC, created_at ASC
 		LIMIT ${limit}
-	`
-		.execute()
-		.catch(() => null);
+	`.catch(() => null);
 
 	if (!rows) return null;
 
@@ -82,9 +80,7 @@ export async function insertScore(entry: InsertScore): Promise<ScoreEntry | null
 			${entry.accuracy}
 		)
 		RETURNING nickname, level, words_completed, words_total, wpm, accuracy, created_at
-	`
-		.execute()
-		.catch(() => null);
+	`.catch(() => null);
 
 	if (!rows || rows.length === 0) return null;
 

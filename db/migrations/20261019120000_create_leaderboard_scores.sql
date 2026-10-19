@@ -1,4 +1,4 @@
-CREATE TABLE leaderboard_scores (
+CREATE TABLE IF NOT EXISTS leaderboard_scores (
 	id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	nickname VARCHAR(20) NOT NULL DEFAULT 'Anônimo',
 	level VARCHAR(16) NOT NULL CHECK (level IN ('iniciante', 'amador', 'expert')),
@@ -12,5 +12,5 @@ CREATE TABLE leaderboard_scores (
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX leaderboard_scores_ranking_idx
+CREATE INDEX IF NOT EXISTS leaderboard_scores_ranking_idx
 	ON leaderboard_scores (level, wpm DESC, accuracy DESC, created_at ASC);
