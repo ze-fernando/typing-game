@@ -232,6 +232,7 @@ export function createGame(level: LevelConfig, events: GameEvents = {}) {
 	}
 
 	function setTyped(value: string): void {
+		if (state.status !== 'running') return;
 		state.typed = value;
 		state.wordError = false;
 	}

@@ -148,8 +148,12 @@
 
 		const target = event.target;
 		const insideButton = target instanceof HTMLElement && target.closest('button') !== null;
+		const insideOtherInput =
+			target instanceof HTMLElement &&
+			target !== inputEl &&
+			target.closest('input, textarea') !== null;
 
-		if ((event.key === 'Enter' || event.code === 'Space') && !insideButton) {
+		if ((event.key === 'Enter' || event.code === 'Space') && !insideButton && !insideOtherInput) {
 			event.preventDefault();
 			game.submit();
 			return;
@@ -274,9 +278,9 @@
 							Continuar
 						</Button>
 					</div>
-				{:else if currentWord}
+				{:else if game.state.status === 'running' && currentWord}
 					<WordDisplay word={currentWord} typed={game.state.typed} error={game.state.wordError} />
-				{:else}
+				{:else if game.state.status === 'finished'}
 					<p class="text-lg font-bold">Partida finalizada</p>
 				{/if}
 			</div>
@@ -285,6 +289,7 @@
 				bind:this={inputEl}
 				value={game.state.typed}
 				oninput={handleInput}
+				disabled={game.state.status !== 'running'}
 				autocomplete="off"
 				autocapitalize="off"
 				autocorrect="off"

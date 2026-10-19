@@ -72,6 +72,21 @@ test.describe('partida', () => {
 		await expect(page.getByRole('dialog').getByText('Velocidade')).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Jogar novamente' })).toBeVisible();
 	});
+
+	test('interrompe a digitação depois do fim da partida', async ({ page }) => {
+		await page.goto('/jogar?nivel=personalizado&palavras=5&tempo=5');
+
+		await expect(page.getByRole('heading', { name: 'Fim de partida' })).toBeVisible({
+			timeout: 20_000
+		});
+
+		await page.keyboard.press('Escape');
+		await expect(page.getByText('Partida finalizada')).toBeVisible();
+
+		await page.keyboard.type('abc');
+
+		await expect(page.locator('input[aria-label="Digite a palavra"]')).toHaveValue('');
+	});
 });
 
 test.describe('API de ranking', () => {
