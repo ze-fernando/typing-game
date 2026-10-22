@@ -31,3 +31,7 @@ playwright-report
 .opencode/
 .data
 .neon
+
+.codex/
+
+.impeccable/
