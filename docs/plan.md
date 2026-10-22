@@ -11,6 +11,8 @@
 
 > **Nota (2026-10-19, pós-fase 7):** o Netlify Database passou a exigir plano com créditos e o provisionamento automático falha em contas free (`database feature not available for this account`), derrubando o build. O ranking foi migrado para um Postgres **Neon** via `@neondatabase/serverless` + `DATABASE_URL`, com migrações em `db/migrations` aplicadas por `npm run db:apply`. Schema, endpoints e fallback `503` continuam iguais.
 
+> **Nota (2026-10-22, entrega senior):** identidade visual trocada para ZionCodes (preto, azul #3b82f6/#2563eb, Saira), versão completa em inglês em `/en` e `/en/play` com i18n tipado, modo demo inglês → português (traduções alternativas e dica que vale metade), bancos com 150+ entradas por nível e modo, ranking por modo (`pt`, `en`, `en-pt`) e nível com teto de 1000 resultados, SQLite local via `node:sqlite` em dev/testes e Neon em produção, migrations em `db/migrations/postgres` e `db/migrations/sqlite`. A paleta da seção 5.2 e a tipografia Inter da seção 5.3 ficam substituídas por `DESIGN.md`. Detalhes e evidências em `docs/reviews/senior-entrega.md`.
+
 ---
 
 ## 1. Resumo do produto
