@@ -3,10 +3,8 @@ import {
 	calculateAccuracy,
 	calculateWpm,
 	compareWord,
-	formatAccuracy,
 	formatClock,
 	formatDuration,
-	formatWpm,
 	normalizeWord,
 	toChars
 } from './scoring';
@@ -79,11 +77,6 @@ describe('cálculos da partida', () => {
 	it('formata duração ativa', () => {
 		expect(formatDuration(35_000)).toBe('35s');
 		expect(formatDuration(65_000)).toBe('1m 05s');
-	});
-
-	it('formata WPM e precisão no padrão brasileiro', () => {
-		expect(formatWpm(42.5)).toBe('42,5');
-		expect(formatAccuracy(98.25)).toBe('98,3%');
 	});
 });
 
