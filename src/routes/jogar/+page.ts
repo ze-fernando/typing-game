@@ -1,10 +1,7 @@
-import { parseGameQuery } from '#lib/game/query';
+import { parseGameQuery } from '#lib/modules/game/query';
+import type { PageLoad } from './$types';
 
 export const prerender = false;
 export const ssr = true;
 
-export function load({ url }: { url: URL }) {
-	return {
-		level: parseGameQuery(url.searchParams)
-	};
-}
+export const load: PageLoad = ({ url }) => ({ level: parseGameQuery(url.searchParams, 'pt') });

@@ -3,46 +3,47 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { Compass, Home, TriangleAlert } from '@lucide/svelte';
-	import SiteFooter from '#lib/components/layout/SiteFooter.svelte';
-	import Button from '#lib/components/ui/Button.svelte';
+	import SiteFooter from '#lib/modules/layout/components/SiteFooter.svelte';
+	import SiteHeader from '#lib/modules/layout/components/SiteHeader.svelte';
+	import Button from '#lib/modules/ui/components/Button.svelte';
+	import { useI18n } from '#lib/modules/i18n/context';
+	import { localizedPath } from '#lib/modules/i18n/paths';
 
+	const i18n = useI18n();
 	const isNotFound = $derived(page.status === 404);
-	const title = $derived(isNotFound ? 'Página não encontrada' : 'Algo deu errado');
-	const description = $derived(
-		isNotFound
-			? 'O endereço acessado não existe ou foi movido. Volte ao início para começar a digitar.'
-			: (page.error?.message ?? 'Tente recarregar a página em alguns instantes.')
+	const title = $derived(
+		isNotFound ? i18n.messages.errorPage.notFoundTitle : i18n.messages.errorPage.genericTitle
 	);
-
-	function goHome(): void {
-		void goto(resolve('/'));
-	}
+	const description = $derived(
+		isNotFound ? i18n.messages.errorPage.notFoundText : i18n.messages.errorPage.genericText
+	);
 </script>
 
+<svelte:head>
+	<title>{title} — {i18n.messages.meta.siteName}</title>
+	<meta name="robots" content="noindex" />
+</svelte:head>
+
 <div class="flex min-h-dvh flex-col">
+	<SiteHeader />
 	<main
 		id="conteudo"
-		class="relative flex flex-1 flex-col items-center justify-center gap-6 px-4 py-16 text-center"
+		class="mx-auto flex w-full max-w-3xl flex-1 flex-col items-start justify-center gap-5 px-4 py-16 sm:px-6"
 	>
-		<span
-			class="flex h-16 w-16 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-[var(--primary)]"
-		>
+		<span class="chip">
 			{#if isNotFound}
-				<Compass class="h-8 w-8" aria-hidden="true" />
+				<Compass class="h-3.5 w-3.5" aria-hidden="true" />
 			{:else}
-				<TriangleAlert class="h-8 w-8" aria-hidden="true" />
+				<TriangleAlert class="h-3.5 w-3.5" aria-hidden="true" />
 			{/if}
+			{i18n.messages.errorPage.code(page.status)}
 		</span>
-
-		<p class="font-mono text-sm font-bold text-[var(--text-muted)]">Erro {page.status}</p>
-		<h1 class="text-3xl font-black sm:text-4xl">{title}</h1>
-		<p class="max-w-md text-sm text-[var(--text-muted)]">{description}</p>
-
-		<Button onclick={goHome}>
+		<h1 class="text-[clamp(2rem,7vw,3rem)] leading-tight font-bold tracking-wide">{title}</h1>
+		<p class="max-w-[60ch] text-[var(--text-muted)]">{description}</p>
+		<Button onclick={() => goto(resolve(localizedPath(i18n.locale, 'home')))}>
 			<Home class="h-4 w-4" aria-hidden="true" />
-			Voltar ao início
+			{i18n.messages.common.backHome}
 		</Button>
 	</main>
-
 	<SiteFooter />
 </div>

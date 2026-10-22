@@ -2,23 +2,31 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import type { LayoutProps } from './$types';
-	import SettingsDialog from '#lib/components/modals/SettingsDialog.svelte';
-	import ToastHub from '#lib/components/ui/ToastHub.svelte';
-	import { hydrateSettings } from '#lib/stores/settings.svelte';
+	import SettingsDialog from '#lib/modules/settings/components/SettingsDialog.svelte';
+	import ToastHub from '#lib/modules/ui/components/ToastHub.svelte';
+	import { provideI18n } from '#lib/modules/i18n/context';
+	import { htmlLang } from '#lib/modules/i18n/paths';
+	import { hydrateSettings } from '#lib/modules/settings/settings.svelte';
 
-	let { children }: LayoutProps = $props();
+	let { children, data }: LayoutProps = $props();
+
+	const i18n = provideI18n(() => data.locale);
 
 	onMount(() => {
-		hydrateSettings();
+		void hydrateSettings();
+	});
+
+	$effect(() => {
+		document.documentElement.lang = htmlLang(i18n.locale);
 	});
 </script>
 
 <svelte:head>
 	<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 	<link rel="manifest" href="/manifest.webmanifest" />
-	<meta name="theme-color" content="#030a16" />
 </svelte:head>
 
+<a class="skip-link" href="#conteudo">{i18n.messages.common.skipLink}</a>
 {@render children()}
 <SettingsDialog />
 <ToastHub />
