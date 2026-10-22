@@ -29,3 +29,5 @@ playwright-report
 
 # OpenCode (skills locais)
 .opencode/
+.data
+.neon

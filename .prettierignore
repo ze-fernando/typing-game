@@ -7,4 +7,7 @@ bun.lockb
 
 # Miscellaneous
 /static/
+.data/
 .opencode/
+.codex/
+.impeccable/

@@ -8,5 +8,5 @@
 			"#lib/*": ["./src/lib/*"]
 		}
 	},
-	"include": ["src", "vite.config.ts", "playwright.config.ts"]
+	"include": ["src", "scripts", "neon.ts", "vite.config.ts", "playwright.config.ts"]
 }
