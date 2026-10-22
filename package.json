@@ -3,9 +3,9 @@
 	"private": true,
 	"version": "1.0.0",
 	"type": "module",
-	"description": "Jogo de digitação em português com níveis, modo personalizado e ranking.",
+	"description": "Jogo de digitação em português e inglês, com modo inglês → português, níveis por acentuação e ranking por modo e nível.",
 	"engines": {
-		"node": ">=20.12.2"
+		"node": ">=24.0.0"
 	},
 	"scripts": {
 		"dev": "vite dev",
@@ -21,7 +21,7 @@
 		"test:unit:watch": "vitest",
 		"test:e2e": "playwright test",
 		"test:e2e:install": "playwright install",
-		"db:apply": "node scripts/db-apply.js"
+		"db:apply": "node scripts/db-apply.ts"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.14.0",
@@ -51,9 +51,11 @@
 		"vitest": "^4.1.8"
 	},
 	"dependencies": {
-		"@fontsource-variable/inter": "^5.3.0",
 		"@fontsource-variable/jetbrains-mono": "^5.3.0",
+		"@fontsource-variable/saira": "^5.3.0",
 		"@lucide/svelte": "^1.59.0",
+		"@neon/config": "^1.9.3",
+		"@neon/env": "^1.6.4",
 		"@neondatabase/serverless": "^1.2.0",
 		"zod": "^4.6.7"
 	},
