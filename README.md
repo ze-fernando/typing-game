@@ -1,6 +1,6 @@
 # Typing Game
 
-Jogo de digitação no navegador, em português (em `/`) e em inglês (em `/en`), com acentuação de verdade, teclado ABNT2 interativo, modo demo **inglês → português** e ranking por modo e nível. Identidade visual ZionCodes, temas claro e escuro.
+Jogo de digitação no navegador, em português (em `/`) e em inglês (em `/en`), com acentuação de verdade, teclado ABNT2 interativo, modos de tradução **inglês → português** (em `/`) e **português → inglês** (em `/en`) e ranking por modo e nível. Identidade visual ZionCodes, temas claro e escuro.
 
 | Nível         | Palavras |   Tempo | Português                       | Inglês                     | Inglês → português                          |
 | ------------- | -------: | ------: | ------------------------------- | -------------------------- | ------------------------------------------- |
@@ -80,12 +80,12 @@ As variáveis são declaradas em `src/env.ts`. `DATABASE_URL` é privada e só �
 
 ## Ranking
 
-- Um ranking por **modo** (`pt`, `en`, `en-pt`) e **nível** (`iniciante`, `amador`, `expert`). O modo personalizado nunca entra.
+- Um ranking por **modo** (`pt`, `en`, `en-pt`, `pt-en`) e **nível** (`iniciante`, `amador`, `expert`). O modo personalizado nunca entra.
 - Cada ranking guarda no máximo **1000** resultados; a cada envio, os piores além do 1000º são podados (ordem: `wpm desc`, `accuracy desc`, `created_at asc`, `id asc`).
-- `GET /api/leaderboard?modo=pt|en|en-pt&nivel=iniciante|amador|expert&limite=1..20` → `{ scores }` (`cache-control: no-store`).
+- `GET /api/leaderboard?modo=pt|en|en-pt|pt-en&nivel=iniciante|amador|expert&limite=1..20` → `{ scores }` (`cache-control: no-store`).
 - `POST /api/scores` → `201 { score, rank }`; `rank` é a posição após o envio, ou `null` se o resultado ficou fora dos 1000.
 - Erros com códigos estáveis: `invalid_json`, `invalid_payload`, `invalid_nickname`, `rate_limited` (5 envios por minuto por instância), `unavailable` (`503`).
-- Antifraude plausível: o servidor recalcula WPM e precisão, exige total de palavras do nível, duração compatível, caracteres corretos dentro dos limites das palavras do banco, no mínimo 150 ms por palavra e teto de WPM por modo (250 em `pt`/`en`, 180 em `en-pt`). Nenhum IP é armazenado.
+- Antifraude plausível: o servidor recalcula WPM e precisão, exige total de palavras do nível, duração compatível, caracteres corretos dentro dos limites das palavras do banco, no mínimo 150 ms por palavra e teto de WPM por modo (250 em `pt`/`en`, 180 em `en-pt`/`pt-en`). Nenhum IP é armazenado.
 - Apelido opcional, até 20 caracteres (letras, números, espaço, apóstrofo, hífen). Vazio é gravado como texto vazio e a interface mostra o rótulo do idioma ("Anônimo" / "Anonymous"); registros antigos com "Anônimo" também são traduzidos, e a migração `20261023120000_anonymous_nickname.sql` os converte para vazio.
 
 ### Repositório e migrations
@@ -126,13 +126,15 @@ O banco de produção já está migrado (3 migrações Postgres aplicadas).
 
 > **Atenção:** com `.env.local` presente, `npm run dev` também passa a usar o Neon. Para desenvolver sem tocar no banco de produção, force o SQLite: `DATABASE_URL=sqlite:.data/leaderboard.sqlite npm run dev`. O `npm run test:e2e` sempre usa SQLite (`.data/e2e/`), porque a config do Playwright define `DATABASE_URL` explicitamente e o valor do processo vence o do `.env.local`.
 
-## Modo demo inglês → português
+## Modos de tradução
 
-- Mostra uma palavra em inglês; o jogador digita a tradução em português. Qualquer tradução alternativa listada no banco vale.
+- **Inglês → português** (`en-pt`, site em português): mostra uma palavra em inglês; o jogador digita a tradução em português.
+- **Português → inglês** (`pt-en`, site em inglês): o mesmo banco invertido; mostra a palavra em português e o jogador digita em inglês.
+- Qualquer tradução alternativa listada no banco vale.
 - Comparação igual à do jogo: sensível a acentos, insensível a maiúsculas.
 - Feedback por letra sem revelar a resposta: as letras ficam verdes enquanto o prefixo existe em alguma alternativa.
 - **Dica:** mostra a primeira letra e o número de letras da tradução principal. A palavra concluída com dica vale **metade dos caracteres corretos** (arredondado para baixo) no WPM. A regra aparece na tela antes do uso, e o resultado mostra quantas palavras usaram dica.
-- Rotas: `/jogar?nivel=amador&modo=en-pt` e `/en/play?nivel=amador&modo=en-pt` (o alias `mode=en-pt` também é aceito).
+- Rotas: `/jogar?nivel=amador&modo=en-pt` e `/en/play?nivel=amador&modo=pt-en` (o alias `mode=` também é aceito).
 
 ## Música de fundo
 
@@ -191,5 +193,5 @@ scripts/db-apply.ts         # aplica migrações nos dois drivers (Node 24 execu
 - Tema claro, escuro ou do sistema, sem flash no carregamento, com fallback se o storage estiver bloqueado.
 - Navegação completa por teclado, foco visível, diálogos nativos com retorno de foco, `aria-live` para palavra, tempo e status.
 - `prefers-reduced-motion` mantém a contagem visível e desliga tremidas e transições.
-- Teclado virtual ABNT2 em três faixas (≤639 px compacto com faixa de acentos, 640–767 px sem teclas de função, ≥768 px completo), alvos de 44 px no celular.
+- Teclado virtual ABNT2 em três faixas (≤639 px compacto com faixa de acentos, 640–767 px sem teclas de função, ≥768 px completo), alvos de 44 px no celular. Em telas de toque o jogo abre o teclado nativo do aparelho por padrão; o botão do cabeçalho alterna para o teclado virtual.
 - Testado com axe (WCAG 2.2 AA) nos dois temas e nas versões pt e en.

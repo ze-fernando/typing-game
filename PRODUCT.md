@@ -12,20 +12,20 @@ Público brasileiro e anglófono, em sessões curtas no navegador, sem instalaç
 
 - **Iniciantes em teclado** — pessoas começando a digitar, que precisam treinar coordenação e acentuação em teclado pt-BR/ABNT2.
 - **Competitivos casuais** — quem já digita bem e persegue WPM, precisão e posição no ranking.
-- **Aprendizes de português** — pessoas praticando acentuação e vocabulário, incluindo não nativas; atendidas pelo modo demo inglês → português.
-- **Quem digita em inglês** — visitantes da versão `/en`, que treinam palavras em inglês e podem experimentar o português pelo modo demo.
+- **Aprendizes de português** — pessoas praticando acentuação e vocabulário, incluindo não nativas; atendidas pelo modo inglês → português.
+- **Quem digita em inglês** — visitantes da versão `/en`, que treinam palavras em inglês e praticam vocabulário pelo modo português → inglês.
 
 O mesmo jogo atende todos por modo e nível, não por personas ou fluxos separados.
 
 ## Product Purpose
 
-Jogo de digitação com três níveis fixos — iniciante (10 palavras em 35 s), amador (15 palavras em 30 s) e avançado (30 palavras em 40 s, id interno `expert`) — em três modos: português (acentuação progressiva), inglês (dificuldade por tamanho e grafia) e demo inglês → português (traduzir a palavra exibida). Há ainda modo personalizado (1 a 100 palavras, 5 a 120 s), teclado ABNT2 interativo, áudio sintetizado e ranking global por modo e nível. Existe para treinar digitação com acentuação de verdade, no vocabulário e no teclado do português.
+Jogo de digitação com três níveis fixos — iniciante (10 palavras em 35 s), amador (15 palavras em 30 s) e avançado (30 palavras em 40 s, id interno `expert`) — em quatro modos: português (acentuação progressiva), inglês (dificuldade por tamanho e grafia), inglês → português (no site em português) e português → inglês (no site em inglês), ambos traduzindo a palavra exibida. Há ainda modo personalizado (1 a 100 palavras, 5 a 120 s), teclado ABNT2 interativo, áudio sintetizado e ranking global por modo e nível. Existe para treinar digitação com acentuação de verdade, no vocabulário e no teclado do português.
 
 Sucesso, confirmado: produto público, indexado nas duas línguas, recebendo tráfego orgânico e partidas reais. Ainda não lançado.
 
 ## Positioning
 
-O jogo de digitação feito para o português: a acentuação é o eixo de dificuldade e o teclado ABNT2 é o instrumento. A versão em inglês amplia o alcance e usa o modo demo como porta de entrada para o português. A referência declarada é o espírito de Termo/Contexto: palavra em primeiro lugar, HUD discreto, sem marketing em volta.
+O jogo de digitação feito para o português: a acentuação é o eixo de dificuldade e o teclado ABNT2 é o instrumento. A versão em inglês amplia o alcance e usa o modo português → inglês como ponte com o vocabulário do jogo. A referência declarada é o espírito de Termo/Contexto: palavra em primeiro lugar, HUD discreto, sem marketing em volta.
 
 ## Operating Context
 
@@ -42,10 +42,10 @@ O jogo de digitação feito para o português: a acentuação é o eixo de dific
 - Três níveis fixos com quantidades e tempos iguais nos três modos; modo personalizado de 1 a 100 palavras e 5 a 120 s.
 - Bancos com pelo menos 150 entradas por nível e por modo; no português a progressão é por acentuação.
 - Comparação sensível a acentos e insensível a maiúsculas/minúsculas, em todos os modos.
-- Modo demo aceita traduções alternativas; a dica (primeira letra e tamanho) faz a palavra valer metade dos caracteres no WPM, regra exibida antes do uso e contada no resultado.
-- Teclado ABNT2 completo no desktop, sem teclas de função entre 640 e 767 px e compacto (letras + faixa de acentos) no celular.
+- Os modos de tradução aceitam traduções alternativas; a dica (primeira letra e tamanho) faz a palavra valer metade dos caracteres no WPM, regra exibida antes do uso e contada no resultado.
+- Teclado ABNT2 completo no desktop, sem teclas de função entre 640 e 767 px e compacto (letras + faixa de acentos) no celular; em telas de toque o padrão é o teclado nativo do aparelho, com opção de trocar para o virtual.
 - A partida termina quando o tempo zera **ou** quando o baralho é concluído.
-- Ranking por modo (`pt`, `en`, `en-pt`) e nível, top 10 na interface, no máximo 1000 resultados guardados por ranking, posição exibida após o envio; anônimo, apelido opcional de até 20 caracteres, sem armazenar IP, com rate limit e checagens de plausibilidade.
+- Ranking por modo (`pt`, `en`, `en-pt`, `pt-en`) e nível, top 10 na interface, no máximo 1000 resultados guardados por ranking, posição exibida após o envio; anônimo, apelido opcional de até 20 caracteres, sem armazenar IP, com rate limit e checagens de plausibilidade.
 - Partidas do modo personalizado nunca entram no ranking global; salvam apenas recorde local.
 - Stack e restrições de engenharia: SvelteKit 3 + Svelte 5 + TypeScript estrito + Tailwind CSS 4; sem `try/catch`, sem classes de OOP, sem IDs de DOM como seletor e sem comentários no código; estrutura modular em `src/lib/modules`; UI em pt-BR e inglês via módulo i18n tipado, código em inglês.
 - Requisitos não funcionais: WCAG 2.2 AA, responsividade de 360 px a telas grandes, SEO com SSR/prerender, sitemap bilíngue, robots e dados estruturados.
@@ -69,7 +69,7 @@ O jogo de digitação feito para o português: a acentuação é o eixo de dific
 
 ## Product Principles
 
-1. **O português é o desafio, não o tema.** A progressão de acentuação é o eixo de dificuldade e a razão do produto existir; o inglês e o modo demo levam gente até ele.
+1. **O português é o desafio, não o tema.** A progressão de acentuação é o eixo de dificuldade e a razão do produto existir; o inglês e os modos de tradução levam gente até ele.
 2. **Digitar primeiro, interface depois.** Palavra atual e tempo lideram; cenário e movimento nunca competem com a leitura.
 3. **Desafio honesto.** O ranking premia partidas reais dos níveis fixos, separado por modo; dica custa pontos e o modo personalizado é treino.
 4. **Serve do primeiro ao speedrunner.** Mesmo jogo, níveis diferentes; sem conta, instalação ou tutorial obrigatório.
