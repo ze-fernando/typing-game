@@ -22,10 +22,10 @@ test.describe('home em português', () => {
 		await expect(page).toHaveURL(/\/jogar\?nivel=amador$/);
 	});
 
-	test('troca para o modo demo inglês → português', async ({ page }) => {
+	test('troca para o modo inglês → português', async ({ page }) => {
 		await page.goto('/');
 		await hydrated(page);
-		await page.getByRole('button', { name: 'Demo: traduzir do inglês' }).click();
+		await page.getByRole('button', { name: 'Traduzir do inglês' }).click();
 		await expect(page.getByText('Aparece uma palavra em inglês; digite')).toBeVisible();
 		await page.locator('[data-level="iniciante"]').click();
 		await expect(page).toHaveURL(/\/jogar\?nivel=iniciante&modo=en-pt$/);
@@ -121,7 +121,7 @@ test.describe('home em português', () => {
 		await expect(custom).toContainText('recorde 31,1 ppm · 20 palavras em 60s');
 		await expect(custom).not.toContainText('90');
 
-		await page.getByRole('button', { name: 'Demo: traduzir do inglês' }).click();
+		await page.getByRole('button', { name: 'Traduzir do inglês' }).click();
 		await expect(page.locator('[data-level="iniciante"]')).toContainText('10 palavras');
 		await expect(page.locator('[data-level="iniciante"]')).not.toContainText('58,4');
 	});
@@ -132,15 +132,14 @@ test.describe('home em inglês', () => {
 		await page.goto('/en');
 
 		await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-		await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-			'Type fast. Then type Portuguese.'
-		);
+		await expect(page.getByRole('heading', { level: 1 })).toHaveText('Type fast. Then translate.');
+		await expect(page.getByText('Example word: heart')).toBeAttached();
 		await expect(page.locator('[data-level="expert"]')).toContainText('Advanced');
 		const year = new Date().getFullYear();
 		await expect(page.getByText(`© ${year} ZionCodes All rights reserved`)).toBeVisible();
 	});
 
-	test('inicia uma partida em inglês e o demo explica a prática de português', async ({ page }) => {
+	test('inicia uma partida em inglês e o modo português → inglês', async ({ page }) => {
 		await page.goto('/en');
 		await hydrated(page);
 		await page.locator('[data-level="iniciante"]').click();
@@ -148,10 +147,10 @@ test.describe('home em inglês', () => {
 
 		await page.goto('/en');
 		await hydrated(page);
-		await page.getByRole('button', { name: 'Demo: practice Portuguese' }).click();
-		await expect(page.getByText('You see an English word; type')).toBeVisible();
+		await page.getByRole('button', { name: 'Translate from Portuguese' }).click();
+		await expect(page.getByText('You see a Portuguese word; type')).toBeVisible();
 		await page.locator('[data-level="amador"]').click();
-		await expect(page).toHaveURL(/\/en\/play\?nivel=amador&modo=en-pt$/);
+		await expect(page).toHaveURL(/\/en\/play\?nivel=amador&modo=pt-en$/);
 	});
 
 	test('o seletor BR/US alterna entre as versões', async ({ page }) => {

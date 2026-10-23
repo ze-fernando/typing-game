@@ -62,7 +62,7 @@ describe('scoreSubmissionSchema', () => {
 		expect(scoreSubmissionSchema.safeParse({ ...valid, level: 'personalizado' }).success).toBe(
 			false
 		);
-		expect(scoreSubmissionSchema.safeParse({ ...valid, mode: 'pt-en' }).success).toBe(false);
+		expect(scoreSubmissionSchema.safeParse({ ...valid, mode: 'es-en' }).success).toBe(false);
 	});
 
 	it('rejeita zero progresso e totais incoerentes', () => {
@@ -98,6 +98,9 @@ describe('scoreSubmissionSchema', () => {
 		const translation = { ...valid, mode: 'en-pt', correctChars: 36, hintedWords: 2 };
 		expect(scoreSubmissionSchema.safeParse(translation).success).toBe(true);
 		expect(scoreSubmissionSchema.safeParse({ ...translation, hintedWords: 9 }).success).toBe(false);
+		expect(
+			scoreSubmissionSchema.safeParse({ ...translation, mode: 'pt-en', correctChars: 30 }).success
+		).toBe(true);
 	});
 
 	it('reduz o mínimo de caracteres quando há palavras com dica', () => {

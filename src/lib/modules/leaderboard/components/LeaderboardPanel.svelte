@@ -3,7 +3,12 @@
 	import Leaderboard from './Leaderboard.svelte';
 	import IconButton from '#lib/modules/ui/components/IconButton.svelte';
 	import SegmentedControl from '#lib/modules/ui/components/SegmentedControl.svelte';
-	import { FIXED_LEVEL_IDS, GAME_MODES } from '#lib/modules/game/levels';
+	import {
+		FIXED_LEVEL_IDS,
+		GAME_MODES,
+		isTranslationMode,
+		translationModeFor
+	} from '#lib/modules/game/levels';
 	import type { FixedLevelId, GameMode } from '#lib/modules/game/types';
 	import { useI18n } from '#lib/modules/i18n/context';
 
@@ -20,7 +25,9 @@
 
 	const activeMode = $derived(mode ?? initialMode);
 	const modeOptions = $derived(
-		GAME_MODES.map((value) => ({ value, label: i18n.messages.modes.short[value] }))
+		GAME_MODES.filter(
+			(value) => !isTranslationMode(value) || value === translationModeFor(i18n.locale)
+		).map((value) => ({ value, label: i18n.messages.modes.short[value] }))
 	);
 	const levelOptions = $derived(
 		FIXED_LEVEL_IDS.map((value) => ({ value, label: i18n.messages.levels.names[value] }))

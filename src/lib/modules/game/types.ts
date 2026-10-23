@@ -1,7 +1,9 @@
 export type FixedLevelId = 'iniciante' | 'amador' | 'expert';
 export type LevelId = FixedLevelId | 'personalizado';
 
-export type GameMode = 'pt' | 'en' | 'en-pt';
+export type GameMode = 'pt' | 'en' | 'en-pt' | 'pt-en';
+
+export type TranslationMode = Extract<GameMode, 'en-pt' | 'pt-en'>;
 
 export type GameStatus = 'idle' | 'countdown' | 'running' | 'paused' | 'finished';
 

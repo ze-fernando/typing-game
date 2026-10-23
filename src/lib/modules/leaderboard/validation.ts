@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { CUSTOM_LIMITS, getFixedLevel, getLevelPool } from '#lib/modules/game/levels';
+import {
+	CUSTOM_LIMITS,
+	getFixedLevel,
+	getLevelPool,
+	isTranslationMode
+} from '#lib/modules/game/levels';
 import { calculateWpm } from '#lib/modules/game/scoring';
 import type { FixedLevelId, GameMode } from '#lib/modules/game/types';
 import { ANONYMOUS_NICKNAME, NICKNAME_MAX_LENGTH } from './limits';
@@ -10,7 +15,8 @@ export { fixedLevelSchema, gameModeSchema };
 export const MAX_WPM_BY_MODE: Record<GameMode, number> = {
 	pt: 250,
 	en: 250,
-	'en-pt': 180
+	'en-pt': 180,
+	'pt-en': 180
 };
 
 export const MIN_MS_PER_WORD = 150;
@@ -90,7 +96,10 @@ export const scoreSubmissionSchema = z
 			context.addIssue({ code: 'custom', message: 'Resultado incompatível com o nível.' });
 		}
 
-		if (value.hintedWords > value.wordsCompleted || (value.mode !== 'en-pt' && value.hintedWords)) {
+		if (
+			value.hintedWords > value.wordsCompleted ||
+			(!isTranslationMode(value.mode) && value.hintedWords)
+		) {
 			context.addIssue({
 				code: 'custom',
 				message: 'Dicas incompatíveis com o modo.',

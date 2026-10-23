@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { answerLanguage, isTranslationMode, promptLanguage } from '#lib/modules/game/levels';
 	import { compareWord, normalizeWord } from '#lib/modules/game/scoring';
 	import type { DeckEntry, GameMode } from '#lib/modules/game/types';
 	import { useI18n } from '#lib/modules/i18n/context';
@@ -21,7 +22,7 @@
 
 	const i18n = useI18n();
 	const ACCENTED = /[áàâãéêíóôõúüç]/i;
-	const isTranslation = $derived(mode === 'en-pt');
+	const translationMode = $derived(isTranslationMode(mode) ? mode : null);
 	const promptLetters = $derived(Array.from(entry.prompt));
 	const typedLength = $derived(Array.from(typed).length);
 	const promptChars = $derived(promptLetters.length);
@@ -39,7 +40,7 @@
 
 	const errorMessage = $derived.by(() => {
 		if (!error) return '';
-		const target = isTranslation ? closestAnswer(typed, entry.answers) : entry.prompt;
+		const target = translationMode ? closestAnswer(typed, entry.answers) : entry.prompt;
 		const mismatch = findAccentMismatch(typed, target);
 		return mismatch
 			? i18n.messages.game.accentError(mismatch.expected, mismatch.typed)
@@ -53,17 +54,17 @@
 
 <div class="@container flex w-full flex-col items-center gap-3 text-center landscape-short:gap-1">
 	<p class="sr-only" aria-live="polite">
-		{isTranslation
-			? i18n.messages.game.currentPrompt(entry.prompt)
+		{translationMode
+			? i18n.messages.game.currentPrompt[translationMode](entry.prompt)
 			: i18n.messages.game.currentWord(entry.prompt)}
 	</p>
 
-	{#if isTranslation}
+	{#if translationMode}
 		<p
 			class="word-fit leading-none font-bold tracking-wide break-all [--glyph:0.66] [--word-max:clamp(2.25rem,9vw,3.5rem)] landscape-short:[--word-max:2.25rem]"
 			style:--chars={promptChars}
 			data-word-prompt
-			lang="en"
+			lang={promptLanguage(mode)}
 			aria-hidden="true"
 		>
 			{entry.prompt}
@@ -74,7 +75,7 @@
 				: ''}"
 			style:--chars={translationChars}
 			data-word-typed
-			lang="pt-BR"
+			lang={answerLanguage(mode)}
 			aria-hidden="true"
 		>
 			{#each feedback.letters as letter, index (index)}
@@ -98,7 +99,7 @@
 				: ''}"
 			style:--chars={typingChars}
 			data-word-prompt
-			lang={mode === 'en' ? 'en' : 'pt-BR'}
+			lang={answerLanguage(mode)}
 			aria-hidden="true"
 		>
 			{#each promptLetters as letter, index (index)}
@@ -125,7 +126,7 @@
 		{errorMessage}
 	</p>
 
-	{#if typed.length === 0 && !error && !isTranslation}
+	{#if typed.length === 0 && !error && !translationMode}
 		<p class="-mt-3 text-sm text-[var(--text-soft)] landscape-short:hidden">
 			{i18n.messages.game.typeHint}
 		</p>

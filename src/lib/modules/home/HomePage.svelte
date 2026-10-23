@@ -12,7 +12,8 @@
 		CUSTOM_DEFAULTS,
 		FIXED_LEVEL_IDS,
 		createCustomLevel,
-		getFixedLevel
+		getFixedLevel,
+		translationModeFor
 	} from '#lib/modules/game/levels';
 	import { gameHref } from '#lib/modules/game/query';
 	import type { BestScore, FixedLevelConfig, GameMode, LevelConfig } from '#lib/modules/game/types';
@@ -25,6 +26,7 @@
 
 	const i18n = useI18n();
 	const primaryMode = $derived<GameMode>(i18n.locale === 'en' ? 'en' : 'pt');
+	const translationMode = $derived(translationModeFor(i18n.locale));
 
 	let selectedMode = $state<GameMode | null>(null);
 	let customOpen = $state(false);
@@ -42,7 +44,7 @@
 	const customBest = $derived(customTarget ? (bests[bestStorageKey(customTarget)] ?? null) : null);
 	const modeOptions = $derived([
 		{ value: primaryMode, label: i18n.messages.modes.typingTab },
-		{ value: 'en-pt' as GameMode, label: i18n.messages.modes.translationTab }
+		{ value: translationMode, label: i18n.messages.modes.translationTab }
 	]);
 
 	$effect(() => {
@@ -106,10 +108,10 @@
 			<div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 				<p class="font-mono text-[clamp(2.75rem,13vw,5rem)] leading-none font-bold tracking-tight">
 					<span class="sr-only">{i18n.messages.home.demoWordLabel}</span>
-					<span aria-hidden="true">cora</span><span
+					<span aria-hidden="true">{i18n.messages.home.heroWord.lead}</span><span
 						class="text-[var(--primary)] underline decoration-[var(--primary)] decoration-4 underline-offset-[0.18em]"
-						aria-hidden="true">çã</span
-					><span aria-hidden="true">o</span>
+						aria-hidden="true">{i18n.messages.home.heroWord.mark}</span
+					><span aria-hidden="true">{i18n.messages.home.heroWord.tail}</span>
 				</p>
 				<ul
 					class="flex flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--text-muted)] sm:flex-col sm:items-end"
@@ -155,7 +157,7 @@
 				/>
 			</div>
 
-			{#if menuMode === 'en-pt'}
+			{#if menuMode === translationMode}
 				<p
 					class="mb-4 max-w-[60ch] text-sm leading-relaxed text-[var(--text-muted)]"
 					aria-live="polite"

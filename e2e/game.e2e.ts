@@ -24,6 +24,26 @@ test.describe('partida', () => {
 		await expect(dialog.getByRole('button', { name: 'Jogar novamente' })).toBeFocused();
 	});
 
+	test('usa o teclado nativo do celular em telas de toque', async ({ browser }) => {
+		const context = await browser.newContext({ hasTouch: true, isMobile: true });
+		const page = await context.newPage();
+		await page.goto('/jogar?nivel=iniciante');
+		await waitForRunning(page);
+
+		await expect(page.locator(input)).toHaveAttribute('inputmode', 'text');
+		await expect(page.getByRole('group', { name: 'Teclado virtual ABNT2' })).toHaveCount(0);
+		await expect(page.getByRole('button', { name: 'Usar teclado virtual ABNT2' })).toBeVisible();
+		await context.close();
+	});
+
+	test('jogo em português → inglês pede a tradução em inglês', async ({ page }) => {
+		await page.goto('/en/play?nivel=iniciante&modo=pt-en');
+		await waitForRunning(page);
+
+		await expect(page.locator(input)).toHaveAttribute('placeholder', 'In English');
+		await expect(page.locator(input)).toHaveAttribute('lang', 'en');
+	});
+
 	test('digita a primeira palavra e avança a contagem', async ({ page }) => {
 		await page.goto('/jogar?nivel=iniciante');
 		await waitForRunning(page);
@@ -87,7 +107,7 @@ test.describe('partida', () => {
 	});
 });
 
-test.describe('modo demo inglês → português', () => {
+test.describe('modo inglês → português', () => {
 	test('aceita a tradução, mostra feedback e conta a dica', async ({ page }) => {
 		await page.goto('/en/play?nivel=iniciante&modo=en-pt');
 		await waitForRunning(page);

@@ -5,13 +5,13 @@ export const EN_MESSAGES: Messages = {
 		siteName: 'Typing Game',
 		homeTitle: 'Typing Game — Free typing game in English and Portuguese',
 		homeDescription:
-			'Free browser typing game: train speed and accuracy in English across three levels, then practice Portuguese with the English → Portuguese demo mode and global leaderboards.',
+			'Free browser typing game: train speed and accuracy in English across three levels, then translate Portuguese words into English, with global leaderboards.',
 		playTitle: 'Play — Typing Game',
 		playDescription:
-			'A typing round with countdown, combo, accuracy and per-level leaderboards. Type English words or translate them into Portuguese.',
+			'A typing round with countdown, combo, accuracy and per-level leaderboards. Type English words or translate Portuguese into English.',
 		ogImageAlt: 'Typing Game — typing game in English and Portuguese',
 		appDescription:
-			'Typing game with beginner, amateur and advanced levels in English, an English → Portuguese practice mode, a custom mode and leaderboards per mode and level.'
+			'Typing game with beginner, amateur and advanced levels in English, a Portuguese → English translation mode, a custom mode and leaderboards per mode and level.'
 	},
 	common: {
 		skipLink: 'Skip to content',
@@ -39,14 +39,15 @@ export const EN_MESSAGES: Messages = {
 		names: {
 			pt: 'Portuguese',
 			en: 'English',
-			'en-pt': 'English → Portuguese'
+			'en-pt': 'English → Portuguese',
+			'pt-en': 'Portuguese → English'
 		},
-		short: { pt: 'PT', en: 'EN', 'en-pt': 'EN → PT' },
+		short: { pt: 'PT', en: 'EN', 'en-pt': 'EN → PT', 'pt-en': 'PT → EN' },
 		menuTitle: 'Game mode',
 		typingTab: 'Type in English',
-		translationTab: 'Demo: practice Portuguese',
+		translationTab: 'Translate from Portuguese',
 		translationIntro:
-			'You see an English word; type its Portuguese translation. Alternative translations count, and accents matter.'
+			'You see a Portuguese word; type its English translation. Alternative translations count.'
 	},
 	levels: {
 		names: {
@@ -70,6 +71,11 @@ export const EN_MESSAGES: Messages = {
 				iniciante: 'Short translations, no accents: house → casa.',
 				amador: 'Translations with accents: apple → maçã.',
 				expert: 'Abstract ideas and dense accents: knowledge → conhecimento.'
+			},
+			'pt-en': {
+				iniciante: 'Short translations into English: casa → house.',
+				amador: 'Accented Portuguese words into English: maçã → apple.',
+				expert: 'Abstract ideas into English: conhecimento → knowledge.'
 			}
 		},
 		recommended: 'start here',
@@ -82,9 +88,10 @@ export const EN_MESSAGES: Messages = {
 		customSummary: (words: number, seconds: number) => `${words} words in ${seconds}s`
 	},
 	home: {
-		heading: 'Type fast. Then type Portuguese.',
-		lead: 'Race the clock in English, or switch to the demo and translate English words into Portuguese — accents included. Capital letters never count against you.',
-		demoWordLabel: 'Example word: coração',
+		heading: 'Type fast. Then translate.',
+		heroWord: { lead: 'he', mark: 'ar', tail: 't' },
+		lead: 'Race the clock in English, or switch modes and translate Portuguese words into English. Capital letters never count against you.',
+		demoWordLabel: 'Example word: heart',
 		keyComboTilde: 'tilde plus a makes ã',
 		keyComboAcute: 'acute accent plus a makes á',
 		keyOwnCedilla: 'its own key',
@@ -105,9 +112,9 @@ export const EN_MESSAGES: Messages = {
 					'Beginner uses short common words, Amateur medium words at a faster pace, and Advanced long words with tricky spelling. Letter case never matters.'
 			},
 			{
-				question: 'How does the English → Portuguese mode work?',
+				question: 'How does the Portuguese → English mode work?',
 				answer:
-					'You see an English word and type its Portuguese translation. Alternative translations count and accents matter. A hint shows the first letter and length, but a hinted word scores half its characters on the leaderboard.'
+					'You see a Portuguese word and type its English translation. Alternative translations count. A hint shows the first letter and length, but a hinted word scores half its characters on the leaderboard.'
 			},
 			{
 				question: 'How does the leaderboard work?',
@@ -147,7 +154,10 @@ export const EN_MESSAGES: Messages = {
 		pausedHelp: 'The clock is frozen.',
 		backToField: 'Back to the field',
 		inputLabel: 'Type the word',
-		inputLabelTranslation: 'Type the Portuguese translation',
+		inputLabelTranslation: {
+			'en-pt': 'Type the Portuguese translation',
+			'pt-en': 'Type the English translation'
+		},
 		placeholder: 'Type here',
 		inputHelp: 'Type the word; Space or Enter submit; Esc clears.',
 		useDeviceKeyboard: 'Use device keyboard',
@@ -165,8 +175,14 @@ export const EN_MESSAGES: Messages = {
 		comboLabel: 'Combo',
 		combo: (count: number) => `combo ×${count}`,
 		currentWord: (word: string) => `Current word: ${word}`,
-		currentPrompt: (word: string) => `Translate into Portuguese: ${word}`,
-		translatePlaceholder: 'In Portuguese',
+		currentPrompt: {
+			'en-pt': (word: string) => `Translate into Portuguese: ${word}`,
+			'pt-en': (word: string) => `Translate into English: ${word}`
+		},
+		translatePlaceholder: {
+			'en-pt': 'In Portuguese',
+			'pt-en': 'In English'
+		},
 		accentError: (expected: string, typed: string) =>
 			`Wrong accent: use ${expected} instead of ${typed}.`,
 		wrongWord: 'Not yet. Fix it with Backspace or clear with Esc.',

@@ -1,4 +1,5 @@
-import { TRANSLATION_BANK } from '#lib/modules/translation/bank';
+import type { Locale } from '#lib/modules/i18n/types';
+import { REVERSE_TRANSLATION_BANK, TRANSLATION_BANK } from '#lib/modules/translation/bank';
 import { EN_WORDS } from '#lib/modules/words/en';
 import { PT_WORDS } from '#lib/modules/words/pt';
 import type {
@@ -8,12 +9,13 @@ import type {
 	FixedLevelId,
 	GameMode,
 	LevelConfig,
-	LevelId
+	LevelId,
+	TranslationMode
 } from './types';
 
 export const FIXED_LEVEL_IDS: readonly FixedLevelId[] = ['iniciante', 'amador', 'expert'];
 
-export const GAME_MODES: readonly GameMode[] = ['pt', 'en', 'en-pt'];
+export const GAME_MODES: readonly GameMode[] = ['pt', 'en', 'en-pt', 'pt-en'];
 
 const FIXED_LEVEL_SETTINGS: Record<
 	FixedLevelId,
@@ -34,7 +36,23 @@ export const CUSTOM_LIMITS = {
 export const CUSTOM_DEFAULTS = { words: 20, seconds: 60 } as const;
 
 export function isGameMode(value: unknown): value is GameMode {
-	return value === 'pt' || value === 'en' || value === 'en-pt';
+	return value === 'pt' || value === 'en' || isTranslationMode(value);
+}
+
+export function isTranslationMode(value: unknown): value is TranslationMode {
+	return value === 'en-pt' || value === 'pt-en';
+}
+
+export function translationModeFor(locale: Locale): TranslationMode {
+	return locale === 'en' ? 'pt-en' : 'en-pt';
+}
+
+export function answerLanguage(mode: GameMode): 'en' | 'pt-BR' {
+	return mode === 'en' || mode === 'pt-en' ? 'en' : 'pt-BR';
+}
+
+export function promptLanguage(mode: GameMode): 'en' | 'pt-BR' {
+	return mode === 'en' || mode === 'en-pt' ? 'en' : 'pt-BR';
 }
 
 export function isFixedLevelId(value: unknown): value is FixedLevelId {
@@ -89,6 +107,7 @@ function typingEntries(words: readonly string[]): DeckEntry[] {
 
 export function getLevelPool(mode: GameMode, level: FixedLevelId): readonly DeckEntry[] {
 	if (mode === 'en-pt') return TRANSLATION_BANK[level];
+	if (mode === 'pt-en') return REVERSE_TRANSLATION_BANK[level];
 	if (mode === 'en') return typingEntries(EN_WORDS[level]);
 	return typingEntries(PT_WORDS[level]);
 }

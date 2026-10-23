@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const fixedLevelSchema = z.enum(['iniciante', 'amador', 'expert']);
 
-export const gameModeSchema = z.enum(['pt', 'en', 'en-pt']);
+export const gameModeSchema = z.enum(['pt', 'en', 'en-pt', 'pt-en']);
 
 export const scoreEntrySchema = z.object({
 	nickname: z.string(),
