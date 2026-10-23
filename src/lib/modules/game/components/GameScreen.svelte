@@ -32,6 +32,7 @@
 	import Chip from '#lib/modules/ui/components/Chip.svelte';
 	import Dialog from '#lib/modules/ui/components/Dialog.svelte';
 	import IconButton from '#lib/modules/ui/components/IconButton.svelte';
+	import { answerLanguage, isTranslationMode } from '#lib/modules/game/levels';
 	import { calculateAccuracy, calculateWpm } from '#lib/modules/game/scoring';
 	import type {
 		BestScore,
@@ -117,13 +118,17 @@
 		calculateAccuracy(game.state.correctChars, game.state.comparedChars)
 	);
 	const currentEntry = $derived(game.state.deck[game.state.index] ?? null);
-	const isTranslation = $derived(level.mode === 'en-pt');
+	const translationMode = $derived(isTranslationMode(level.mode) ? level.mode : null);
+	const isTranslation = $derived(translationMode !== null);
 	const showRecovery = $derived(game.state.status === 'running' && !inputFocused);
 	const inputLabel = $derived(
-		isTranslation ? i18n.messages.game.inputLabelTranslation : i18n.messages.game.inputLabel
+		translationMode
+			? i18n.messages.game.inputLabelTranslation[translationMode]
+			: i18n.messages.game.inputLabel
 	);
 
 	onMount(() => {
+		deviceKeyboard = window.matchMedia('(pointer: coarse)').matches;
 		game.begin();
 		inputEl?.focus();
 	});
@@ -494,11 +499,11 @@
 						spellcheck="false"
 						inputmode={deviceKeyboard ? 'text' : 'none'}
 						enterkeyhint="done"
-						lang={level.mode === 'en' ? 'en' : 'pt-BR'}
+						lang={answerLanguage(level.mode)}
 						aria-label={inputLabel}
 						aria-describedby="game-input-help"
-						placeholder={isTranslation
-							? i18n.messages.game.translatePlaceholder
+						placeholder={translationMode
+							? i18n.messages.game.translatePlaceholder[translationMode]
 							: i18n.messages.game.placeholder}
 						data-game-input
 						class="h-12 w-full min-w-0 rounded-lg border border-[var(--control-border)] bg-[var(--bg)] px-3 text-center font-mono text-lg text-[var(--text)] outline-none placeholder:text-[var(--text-soft)] focus-visible:border-[var(--primary)] focus-visible:ring-2 focus-visible:ring-[var(--primary)]/30 disabled:opacity-60 landscape-short:h-11"

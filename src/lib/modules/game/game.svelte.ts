@@ -1,4 +1,5 @@
 import { createDeck } from '#lib/modules/game/deck';
+import { isTranslationMode } from '#lib/modules/game/levels';
 import {
 	calculateAccuracy,
 	calculateWpm,
@@ -292,7 +293,7 @@ export function createGame(
 	}
 
 	function revealHint(): void {
-		if (state.status !== 'running' || state.hintVisible || level.mode !== 'en-pt') return;
+		if (state.status !== 'running' || state.hintVisible || !isTranslationMode(level.mode)) return;
 		state.hintVisible = true;
 		state.hintsUsed += 1;
 	}

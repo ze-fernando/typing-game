@@ -1,4 +1,4 @@
-import type { FixedLevelId, GameMode, LevelId } from '#lib/modules/game/types';
+import type { FixedLevelId, GameMode, LevelId, TranslationMode } from '#lib/modules/game/types';
 import type { Locale } from '../types';
 
 export const PT_MESSAGES = {
@@ -12,7 +12,7 @@ export const PT_MESSAGES = {
 			'Partida de digitação em português com contagem regressiva, combo, precisão e ranking por nível. Acentos de verdade contam.',
 		ogImageAlt: 'Typing Game — jogo de digitação em português',
 		appDescription:
-			'Jogo de digitação em português com níveis iniciante, amador e avançado, modo demo inglês → português, modo personalizado e ranking por modo e nível.'
+			'Jogo de digitação em português com níveis iniciante, amador e avançado, modo inglês → português, modo personalizado e ranking por modo e nível.'
 	},
 	common: {
 		skipLink: 'Pular para o conteúdo',
@@ -43,12 +43,16 @@ export const PT_MESSAGES = {
 		names: {
 			pt: 'Português',
 			en: 'Inglês',
-			'en-pt': 'Inglês → português'
+			'en-pt': 'Inglês → português',
+			'pt-en': 'Português → inglês'
 		} satisfies Record<GameMode, string>,
-		short: { pt: 'PT', en: 'EN', 'en-pt': 'EN → PT' } satisfies Record<GameMode, string>,
+		short: { pt: 'PT', en: 'EN', 'en-pt': 'EN → PT', 'pt-en': 'PT → EN' } satisfies Record<
+			GameMode,
+			string
+		>,
 		menuTitle: 'Modo de jogo',
 		typingTab: 'Digitar em português',
-		translationTab: 'Demo: traduzir do inglês',
+		translationTab: 'Traduzir do inglês',
 		translationIntro:
 			'Aparece uma palavra em inglês; digite a tradução em português. Traduções alternativas valem, e acento continua contando.'
 	},
@@ -74,6 +78,11 @@ export const PT_MESSAGES = {
 				iniciante: 'Traduções curtas e sem acento: house → casa.',
 				amador: 'Traduções com acento: apple → maçã.',
 				expert: 'Ideias abstratas e acentos densos: knowledge → conhecimento.'
+			},
+			'pt-en': {
+				iniciante: 'Traduções curtas para o inglês: casa → house.',
+				amador: 'Palavras acentuadas para o inglês: maçã → apple.',
+				expert: 'Ideias abstratas para o inglês: conhecimento → knowledge.'
 			}
 		} satisfies Record<GameMode, Record<FixedLevelId, string>>,
 		recommended: 'comece aqui',
@@ -87,6 +96,7 @@ export const PT_MESSAGES = {
 	},
 	home: {
 		heading: 'Digite em português. Com acento.',
+		heroWord: { lead: 'cora', mark: 'çã', tail: 'o' },
 		lead: 'No teclado ABNT2, acento é tecla: ~ depois a vira ã, ´ depois a vira á. Maiúsculas não contam, acentos sim.',
 		demoWordLabel: 'Exemplo de palavra: coração',
 		keyComboTilde: 'til mais a forma ã',
@@ -151,7 +161,10 @@ export const PT_MESSAGES = {
 		pausedHelp: 'O tempo está congelado.',
 		backToField: 'Voltar ao campo',
 		inputLabel: 'Digite a palavra',
-		inputLabelTranslation: 'Digite a tradução em português',
+		inputLabelTranslation: {
+			'en-pt': 'Digite a tradução em português',
+			'pt-en': 'Digite a tradução em inglês'
+		} satisfies Record<TranslationMode, string>,
 		placeholder: 'Digite aqui',
 		inputHelp: 'Digite a palavra; Espaço ou Enter confirmam; Esc limpa.',
 		useDeviceKeyboard: 'Usar teclado do dispositivo',
@@ -169,8 +182,14 @@ export const PT_MESSAGES = {
 		comboLabel: 'Combo',
 		combo: (count: number) => `combo ×${count}`,
 		currentWord: (word: string) => `Palavra atual: ${word}`,
-		currentPrompt: (word: string) => `Traduza para o português: ${word}`,
-		translatePlaceholder: 'Em português',
+		currentPrompt: {
+			'en-pt': (word: string) => `Traduza para o português: ${word}`,
+			'pt-en': (word: string) => `Traduza para o inglês: ${word}`
+		} satisfies Record<TranslationMode, (word: string) => string>,
+		translatePlaceholder: {
+			'en-pt': 'Em português',
+			'pt-en': 'Em inglês'
+		} satisfies Record<TranslationMode, string>,
 		accentError: (expected: string, typed: string) =>
 			`Acento errado: use ${expected} em vez de ${typed}.`,
 		wrongWord: 'Ainda não. Corrija com Backspace ou limpe com Esc.',

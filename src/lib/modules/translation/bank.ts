@@ -730,3 +730,22 @@ export const TRANSLATION_BANK: Record<FixedLevelId, readonly TranslationEntry[]>
 		{ prompt: 'traditional', answers: ['tradicional'] }
 	]
 };
+
+function reverseEntries(entries: readonly TranslationEntry[]): TranslationEntry[] {
+	const byPrompt = new Map<string, string[]>();
+
+	for (const entry of entries) {
+		const prompt = entry.answers[0];
+		const answers = byPrompt.get(prompt) ?? [];
+		if (!answers.includes(entry.prompt)) answers.push(entry.prompt);
+		byPrompt.set(prompt, answers);
+	}
+
+	return Array.from(byPrompt, ([prompt, answers]) => ({ prompt, answers }));
+}
+
+export const REVERSE_TRANSLATION_BANK: Record<FixedLevelId, readonly TranslationEntry[]> = {
+	iniciante: reverseEntries(TRANSLATION_BANK.iniciante),
+	amador: reverseEntries(TRANSLATION_BANK.amador),
+	expert: reverseEntries(TRANSLATION_BANK.expert)
+};

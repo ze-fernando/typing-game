@@ -2,13 +2,17 @@ import { describe, expect, it } from 'vitest';
 import {
 	CUSTOM_LIMITS,
 	FIXED_LEVEL_IDS,
+	answerLanguage,
 	createCustomLevel,
 	getDeckPool,
 	getFixedLevel,
 	getLevelPool,
 	isGameMode,
+	isTranslationMode,
 	levelKey,
-	resolveLevel
+	promptLanguage,
+	resolveLevel,
+	translationModeFor
 } from './levels';
 
 describe('níveis fixos', () => {
@@ -33,10 +37,29 @@ describe('níveis fixos', () => {
 		expect(getFixedLevel('avancado')).toBeNull();
 	});
 
-	it('reconhece apenas os três modos', () => {
+	it('reconhece apenas os quatro modos', () => {
 		expect(isGameMode('pt')).toBe(true);
 		expect(isGameMode('en-pt')).toBe(true);
-		expect(isGameMode('pt-en')).toBe(false);
+		expect(isGameMode('pt-en')).toBe(true);
+		expect(isGameMode('es-en')).toBe(false);
+	});
+
+	it('escolhe o modo de tradução pelo idioma do site', () => {
+		expect(translationModeFor('pt-BR')).toBe('en-pt');
+		expect(translationModeFor('en')).toBe('pt-en');
+		expect(isTranslationMode('pt-en')).toBe(true);
+		expect(isTranslationMode('en')).toBe(false);
+	});
+
+	it('define o idioma da palavra exibida e da resposta', () => {
+		expect([promptLanguage('pt-en'), answerLanguage('pt-en')]).toEqual(['pt-BR', 'en']);
+		expect([promptLanguage('en-pt'), answerLanguage('en-pt')]).toEqual(['en', 'pt-BR']);
+	});
+
+	it('inverte o banco de tradução no modo português → inglês', () => {
+		const pool = getLevelPool('pt-en', 'iniciante');
+		expect(pool.find((entry) => entry.prompt === 'casa')?.answers).toContain('house');
+		expect(new Set(pool.map((entry) => entry.prompt)).size).toBe(pool.length);
 	});
 
 	it('gera uma chave estável por modo e nível', () => {

@@ -4,7 +4,7 @@
 	import Leaderboard from '#lib/modules/leaderboard/components/Leaderboard.svelte';
 	import Button from '#lib/modules/ui/components/Button.svelte';
 	import Dialog from '#lib/modules/ui/components/Dialog.svelte';
-	import { isFixedLevelId } from '#lib/modules/game/levels';
+	import { isFixedLevelId, isTranslationMode } from '#lib/modules/game/levels';
 	import { formatDuration } from '#lib/modules/game/scoring';
 	import type { BestScore, FixedLevelId, GameResult, ScoreEntry } from '#lib/modules/game/types';
 	import { useI18n } from '#lib/modules/i18n/context';
@@ -78,7 +78,7 @@
 					},
 					{ label: i18n.messages.results.activeTime, value: activeTime(result.durationMs) },
 					{ label: i18n.messages.results.bestCombo, value: `×${result.bestCombo}` },
-					result.mode === 'en-pt'
+					isTranslationMode(result.mode)
 						? { label: i18n.messages.results.hints, value: String(result.hintedWords) }
 						: { label: i18n.messages.results.misses, value: String(result.errors) }
 				]
